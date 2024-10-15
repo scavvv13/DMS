@@ -6,4 +6,3 @@ import path from "path"; // Import the path module
 export default defineConfig({
   plugins: [react()],
 });
-})

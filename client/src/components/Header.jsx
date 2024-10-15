@@ -12,7 +12,7 @@ const Header = () => {
       <div className="navbar-start">
         <div className="badge badge-primary badge-outline">Regular User</div>
       </div>
-      <div className="navbar-end">
+      <div className=" bg-base-300 p-3 rounded-2xl shadow-lg ">
         <div className="join mr-10">
           <div>
             <div>
