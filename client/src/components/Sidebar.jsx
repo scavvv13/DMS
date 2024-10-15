@@ -12,7 +12,11 @@ const Sidebar = () => {
     <div className="flex rounded-md">
       {/* Sidebar */}
       <div
+<<<<<<< HEAD
         className={`flex flex-col bg-base-300 rounded-md w-64 space-y-6 py-7 px-4 mr-2 h-screen absolute inset-y-0 left-0 transform ${
+=======
+        className={`bg-base-300 w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${
+>>>>>>> 280fd07ea44cf9dc5c7c2959b4fe093e9708273e
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:relative md:translate-x-0 transition duration-200 ease-in-out`}
       >
@@ -52,6 +56,7 @@ const Sidebar = () => {
             Settings
           </a>
         </nav>
+<<<<<<< HEAD
 
         {/* Logout Button */}
         <div className="mt-auto flex justify-center">
@@ -59,6 +64,8 @@ const Sidebar = () => {
             Logout
           </button>
         </div>
+=======
+>>>>>>> 280fd07ea44cf9dc5c7c2959b4fe093e9708273e
       </div>
     </div>
   );
