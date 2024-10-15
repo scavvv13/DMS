@@ -1,24 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useUser } from "../contexts/UserContext"; // Use custom hook to access context
+import React from "react";
 
 const UsersPage = () => {
-  const { user } = useUser(); // Get user from context
-  const [isUserLoading, setIsUserLoading] = useState(null); // Local state for user data
-
-  // Simulate fetching user data or processing based on context
-  useEffect(() => {
-    if (user && user.role === "admin") {
-      setIsUserLoading(user); // Use user data from context
-    }
-  }, [user]);
-
-  // If user data is not available, show loading state
-  if (!isUserLoading) {
-    return <div>Loading user data...</div>;
-  }
-
   return (
-    <div className="  ">
+    <div className=" overflow-x-auto ">
       <table className="table">
         {/* head */}
         <thead>
