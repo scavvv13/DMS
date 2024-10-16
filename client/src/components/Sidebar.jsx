@@ -106,9 +106,7 @@ const Sidebar = () => {
         </nav>
 
         {/* Logout Button */}
-        <div className="flex justify-center mt-2">
-          {" "}
-          {/* Adjusted margin-top here */}
+        <div className="mt-auto flex justify-center">
           <button className="py-2 rounded-md btn btn-outline btn-primary w-32 hover:bg-primary hover:text-white transition duration-200">
             Logout
           </button>

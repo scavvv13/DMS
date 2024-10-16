@@ -6,16 +6,15 @@ import Sidebar from "./Sidebar";
 const Layout = () => {
   return (
     <>
-      <div className="m-2 flex flex-row">
-        <div className="mr-2 bg-base-300 rounded-md max-h-[600px]">
-          <Sidebar />
-        </div>
+      <div className=" h-[520px] flex flex-row m-3 pb-5 ">
+        <Sidebar />
 
         <div className="flex-1 flex flex-col">
+          {/* Header takes up its natural height */}
           <div className=" mb-2 ">
             <Header />
           </div>
-          <div className="p-3 bg-base-300 max-h-[450px] rounded-md container overflow-y-scroll no-scrollbar flex-1">
+          <div className=" ml-2 p-3 bg-base-100 h-screen rounded-md container overflow-y-scroll no-scrollbar ">
             <Outlet />
           </div>
         </div>
