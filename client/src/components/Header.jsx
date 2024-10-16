@@ -8,11 +8,7 @@ const Header = () => {
   // const [roleBadge, setRoleBadge] = useContext("");
 
   return (
-<<<<<<< HEAD
-    <div className="navbar bg-base rounded-md p-3 container">
-=======
     <div className="navbar bg-base-300 rounded-md p-3 container">
->>>>>>> 280fd07ea44cf9dc5c7c2959b4fe093e9708273e
       <div className="navbar-start">
         <div className="badge badge-primary badge-outline">Regular User</div>
       </div>
