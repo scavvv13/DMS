@@ -11,8 +11,6 @@ body {
   -ms-overflow-style: none; /* For IE and Edge */
   scrollbar-width: none; /* For Firefox */
 }
-<<<<<<< HEAD
-=======
 
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -25,4 +23,3 @@ body {
     scrollbar-width: none; /* Firefox */
   }
 }
->>>>>>> 280fd07ea44cf9dc5c7c2959b4fe093e9708273e

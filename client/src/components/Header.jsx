@@ -1,29 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useState, useEffect, useContext } from "react";
+import { useUser } from "../contexts/UserContext";
 
 const Header = () => {
-  const [token, setToken] = useState(true);
-  const [showMenu, setShowMenu] = useState(true);
-  // const [roleBadge, setRoleBadge] = useContext("");
+  const { user } = useUser();
+  const [token, setToken] = useState(!!user); // Check if user is logged in
+  const [roleBadge, setRoleBadge] = useState("");
+  const [theme, setTheme] = useState("light"); // Default theme
+
+  useEffect(() => {
+    // Check local storage for saved theme preference
+    const savedTheme = localStorage.getItem("theme") || "light"; // Default to light
+    setTheme(savedTheme);
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    if (user) {
+      setToken(true);
+      setRoleBadge(user.role); // Set role badge based on user role
+    } else {
+      setToken(false);
+      setRoleBadge("");
+    }
+  }, [user]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme); // Save theme to local storage
+  };
 
   return (
-    <div className="navbar bg-base-300 rounded-md p-3 container">
+    <div className="navbar bg-base rounded-md p-3 container">
       <div className="navbar-start">
-        <div className="badge badge-primary badge-outline">Regular User</div>
+        <p className="font-bold text-3xl ml-3">{user ? `${user.name}` : ""}</p>
+        {roleBadge && (
+          <div className="badge badge-primary badge-outline ml-3">
+            {roleBadge}
+          </div>
+        )}
       </div>
       <div className="navbar-end">
         <div className="join mr-10">
-          <div>
-            <div>
-              <input
-                className="input input-bordered join-item"
-                placeholder="Search"
-              />
-            </div>
-          </div>
+          <input
+            className="input input-bordered join-item"
+            placeholder="Search"
+          />
           <select className="select select-bordered join-item">
-            <option disabled value>
+            <option disabled value="">
               Filter
             </option>
             <option>Sci-fi</option>
@@ -68,10 +92,13 @@ const Header = () => {
           </ul>
         </div>
         <label className="swap swap-rotate mr-7">
-          {/* this hidden checkbox controls the state */}
-          <input type="checkbox" className="theme-controller" value="light" />
+          <input
+            type="checkbox"
+            checked={theme === "dark"}
+            onChange={toggleTheme}
+          />
 
-          {/* sun icon */}
+          {/* Sun icon */}
           <svg
             className="swap-off h-8 w-8 fill-current"
             xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +107,7 @@ const Header = () => {
             <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
           </svg>
 
-          {/* moon icon */}
+          {/* Moon icon */}
           <svg
             className="swap-on h-8 w-8 fill-current"
             xmlns="http://www.w3.org/2000/svg"
@@ -91,11 +118,16 @@ const Header = () => {
         </label>
 
         {!token ? (
-          <button className=" btn btn-primary w-28 text-md ml-3 ">Login</button>
+          <Link to="/login" className="btn btn-primary w-28 text-md ml-3">
+            Login
+          </Link>
         ) : (
-          <div className="avatar btn-primary ">
+          <div className="avatar btn-primary">
             <div className="ring-primary ring-offset-base-100 w-11 rounded-full ring ring-offset-2 mx-3">
-              <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+              <img
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                alt="User Avatar"
+              />
             </div>
           </div>
         )}
