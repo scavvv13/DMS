@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Use Link for routing
+import { useUser } from "../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 import {
   HiUsers,
   HiHome,
@@ -11,11 +13,16 @@ import miaa from "../assets/miaa.png"; // Adjust the path if needed
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useUser(); // Get logout function from context
+  const navigate = useNavigate(); // Hook for navigation
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
+  const handleLogout = () => {
+    logout(); // Call the logout function
+    navigate("/LoginPage"); // Redirect to login page after logout
+  };
   return (
     <>
       {/* Sidebar Toggle Button for Mobile */}
@@ -109,7 +116,10 @@ const Sidebar = () => {
         <div className=" mb-5">
           {" "}
           {/* Adjusted margin-top here */}
-          <button className="py-2 rounded-md btn btn-outline btn-primary w-32 hover:bg-primary hover:text-white transition duration-200">
+          <button
+            className="py-2 rounded-md btn btn-outline btn-primary w-32 hover:bg-primary hover:text-white transition duration-200"
+            onClick={handleLogout}
+          >
             Logout
           </button>
         </div>

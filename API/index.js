@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const helmet = require("helmet");
 require("dotenv").config();
 
 const authRoutes = require("./routes/AuthRoutes");
@@ -10,6 +11,7 @@ const app = express();
 
 // Middleware
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
 
 // Routes
@@ -18,7 +20,7 @@ app.use("/api/user", userRoutes);
 
 // Database connection
 mongoose
-  .connect(process.env.MONGO_URI, {
+  .connect(`${process.env.MONGO_URI}/DMS`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -26,5 +28,5 @@ mongoose
   .catch((err) => console.error(err));
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

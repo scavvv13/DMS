@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Backend for MIA DMS",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "nodemon"
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",

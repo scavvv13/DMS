@@ -14,60 +14,59 @@ import UnauthorizedPage from "./Pages/UnauthorizedPage";
 
 const App = () => {
   return (
-    <UserContextProvider>
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/LoginPage" element={<LoginPage />} />
-          <Route path="/RegisterPage" element={<RegisterPage />} />
-          <Route path="/UnauthorizedPage" element={<UnauthorizedPage />} />
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/LoginPage" element={<LoginPage />} />
+        <Route path="/RegisterPage" element={<RegisterPage />} />
+        <Route path="/UnauthorizedPage" element={<UnauthorizedPage />} />
 
-          {/* Protected Routes with Layout */}
-          <Route element={<Layout />}>
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <HomePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/ProfilePage"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/UsersPage"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <UsersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/DocumentsPage"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DocumentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/DashboardPage"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
-        </Routes>
-      </Router>
-    </UserContextProvider>
+        {/* Protected Routes with Layout */}
+        <Route element={<Layout />}>
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/ProfilePage"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/UsersPage"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/DocumentsPage"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <DocumentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/DashboardPage"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+      </Routes>
+    </Router>
   );
 };
 
