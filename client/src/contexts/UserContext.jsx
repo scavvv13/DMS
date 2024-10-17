@@ -36,7 +36,7 @@ export const UserContextProvider = ({ children }) => {
 
     try {
       const response = await axiosInstance.get("/user/profile");
-      console.log("User profile response:", response.data); // Log the response
+
       if (response.data.success) {
         // Check if the request was successful
         setUser(response.data.user); // Set user data

@@ -117,7 +117,7 @@ const Sidebar = () => {
           {" "}
           {/* Adjusted margin-top here */}
           <button
-            className="py-2 rounded-md btn btn-outline btn-primary w-32 hover:bg-primary hover:text-white transition duration-200"
+            className="py-2  rounded-md btn btn-outline btn-primary w-25 h-3 hover:bg-primary hover:text-white transition duration-200"
             onClick={handleLogout}
           >
             Logout
