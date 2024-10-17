@@ -27,7 +27,7 @@ const App = () => {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRoles={["admin"]}>
                 <HomePage />
               </ProtectedRoute>
             }
@@ -35,7 +35,7 @@ const App = () => {
           <Route
             path="/admin/ProfilePage"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRoles={["admin"]}>
                 <ProfilePage />
               </ProtectedRoute>
             }
@@ -43,7 +43,7 @@ const App = () => {
           <Route
             path="/admin/UsersPage"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRoles={["admin"]}>
                 <UsersPage />
               </ProtectedRoute>
             }
@@ -51,7 +51,7 @@ const App = () => {
           <Route
             path="/admin/DocumentsPage"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRoles={["admin", "user"]}>
                 <DocumentsPage />
               </ProtectedRoute>
             }
@@ -59,7 +59,7 @@ const App = () => {
           <Route
             path="/admin/DashboardPage"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRoles={["admin"]}>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -67,7 +67,7 @@ const App = () => {
           <Route
             path="/user"
             element={
-              <ProtectedRoute requiredRole="user">
+              <ProtectedRoute requiredRoles={["user"]}>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -75,7 +75,7 @@ const App = () => {
           <Route
             path="/user/DashboardPage"
             element={
-              <ProtectedRoute requiredRole="user">
+              <ProtectedRoute requiredRoles={["user"]}>
                 <DashboardPage />
               </ProtectedRoute>
             }

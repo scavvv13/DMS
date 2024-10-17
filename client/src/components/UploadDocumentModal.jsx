@@ -73,7 +73,13 @@ const UploadDocumentModal = ({ refreshDocuments }) => {
     const fileUrl = URL.createObjectURL(file); // Create a temporary URL for preview
 
     if (fileType.includes("image")) {
-      return <img src={fileUrl} alt="Preview" className="w-full h-auto mb-2" />;
+      return (
+        <img
+          src={fileUrl}
+          alt="Preview"
+          className="w-full h-auto mb-2 rounded-lg"
+        />
+      );
     } else if (fileType.includes("pdf")) {
       return (
         <iframe
@@ -94,9 +100,9 @@ const UploadDocumentModal = ({ refreshDocuments }) => {
   };
 
   return (
-    <dialog id="uploadModal" className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">Upload Document</h3>
+    <dialog id="uploadModal" className="modal no-scrollbar">
+      <div className="modal-box no-scrollbar">
+        <h3 className="font-bold text-lg mb-3">Upload Document</h3>
         {getFilePreview()} {/* Show file preview based on type */}
         <form onSubmit={handleUpload} className="py-4">
           <input

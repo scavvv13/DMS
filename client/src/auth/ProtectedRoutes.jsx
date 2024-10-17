@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = ({ children, requiredRoles }) => {
   const { user, loading } = useUser(); // Get user and loading state from context
 
   // Check token expiration
@@ -25,8 +25,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/LoginPage" />;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/UnauthorizedPage" />; // Redirect if user doesn't have required role
+  // If requiredRoles is defined, check if the user's role matches any of the required roles
+  if (requiredRoles && !requiredRoles.includes(user.role)) {
+    return <Navigate to="/UnauthorizedPage" />; // Redirect if user doesn't have the required role
   }
 
   // Render the protected component if all checks pass

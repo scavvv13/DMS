@@ -4,7 +4,9 @@ const multer = require("multer");
 const {
   postDocument,
   getDocuments,
-  deleteDocument, // Import the deleteDocument controller
+  deleteDocument,
+  shareDocument,
+  removeAccess, // Import the deleteDocument controller
 } = require("../controllers/documentController");
 const router = express.Router();
 
@@ -30,4 +32,15 @@ router.delete(
   deleteDocument
 ); // Delete document by ID
 
+router.post(
+  "/documents/:id/share",
+  authMiddleware(["user", "admin"]),
+  shareDocument
+); // Share document with users
+
+router.post(
+  "/documents/:id/remove-access",
+  authMiddleware(["user", "admin"]),
+  removeAccess
+);
 module.exports = router;

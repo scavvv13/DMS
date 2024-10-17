@@ -1,76 +1,111 @@
 import React, { useEffect, useState } from "react";
-import axiosInstance from "../utils/axiosInstance"; // Ensure you have your axios instance set up
-import { useUser } from "../contexts/UserContext"; // User context for auth
-import UploadDocumentModal from "../components/UploadDocumentModal"; // Import the modal for uploading documents
+import axiosInstance from "../utils/axiosInstance";
+import { useUser } from "../contexts/UserContext";
+import UploadDocumentModal from "../components/UploadDocumentModal";
+import DocumentMenuModal from "../components/DocumentMenuModal"; // Import the new modal
+import Popup from "../components/Popup"; // Import your Popup component for notifications
 
 const DocumentsPage = () => {
-  const { user } = useUser(); // Get user data to ensure authorization
+  const { user } = useUser();
   const [documents, setDocuments] = useState([]);
+  const [selectedDocument, setSelectedDocument] = useState(null); // State for selected document
+  const [shareEmail, setShareEmail] = useState("");
+  const [toastMessage, setToastMessage] = useState(""); // State for toast message
+  const [toastType, setToastType] = useState(""); // State for toast type
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false); // State for managing modal visibility
 
-  // Fetch documents on component mount
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await axiosInstance.get("/documents"); // Fetch documents from the server
-        console.log("Fetched documents:", response.data);
-        setDocuments(response.data.documents); // Access the documents array
+        const response = await axiosInstance.get("/documents");
+        setDocuments(response.data.documents);
       } catch (error) {
         console.error("Error fetching documents:", error);
       }
     };
 
     fetchDocuments();
-  }, [user.id]); // Include user.id in dependency array to refetch if user changes
+  }, []);
 
-  // File size formatter function
   const formatFileSize = (bytes) => {
     const sizes = ["B", "KB", "MB", "GB", "TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  // Refresh documents list after any action (like delete)
   const refreshDocuments = async () => {
     try {
-      const response = await axiosInstance.get("/documents"); // Fetch documents from the server
-      setDocuments(response.data.documents); // Access the documents array
+      const response = await axiosInstance.get("/documents");
+      setDocuments(response.data.documents);
     } catch (error) {
       console.error("Error refreshing documents:", error);
     }
   };
 
-  // Handle deletion of a document
   const handleDelete = async (documentId) => {
     try {
       await axiosInstance.delete(`/documents/${documentId}`);
-      refreshDocuments(); // Refresh documents after deletion
+      setToastMessage("Document deleted successfully.");
+      setToastType("success");
+      refreshDocuments();
     } catch (error) {
       console.error("Error deleting document:", error);
+      setToastMessage(error.response.data.message);
+      setToastType("error");
     }
   };
 
-  // Function to render a preview based on document type
+  const handleShare = async (documentId) => {
+    try {
+      const response = await axiosInstance.post(
+        `/documents/${documentId}/share`,
+        { email: shareEmail }
+      );
+      setToastMessage(response.data.message);
+      setToastType("success");
+      setShareEmail("");
+      refreshDocuments();
+    } catch (error) {
+      console.error("Error sharing document:", error);
+      setToastMessage(error.response.data.message);
+      setToastType("error");
+    }
+  };
+
+  const handleRemoveAccess = async (documentId, email) => {
+    try {
+      await axiosInstance.post(`/documents/${documentId}/remove-access`, {
+        email,
+      });
+      setToastMessage("Access removed successfully.");
+      setToastType("success");
+      refreshDocuments();
+    } catch (error) {
+      console.error("Error removing access:", error);
+      setToastMessage(error.response.data.message);
+      setToastType("error");
+    }
+  };
+
   const renderDocumentPreview = (doc) => {
     const fileType = doc.documentType;
 
     if (fileType.includes("image")) {
       return (
         <img
-          src={doc.documentImageURL} // Use the image URL for images
+          src={doc.documentImageURL}
           alt={doc.documentName}
           className="w-full h-full object-cover"
         />
       );
     } else if (fileType.includes("pdf")) {
       return (
-        <div className="w-full h-full overflow-hidden">
-          <iframe
-            src={doc.documentImageURL} // Use the PDF URL for PDF previews
-            title="PDF Preview"
-            className="w-full h-full border-none"
-            style={{ overflow: "hidden" }} // Hide scrollbar
-          />
-        </div>
+        <iframe
+          src={doc.documentImageURL}
+          title="PDF Preview"
+          className="w-full h-full border-none"
+          style={{ overflow: "hidden" }}
+        />
       );
     } else {
       return (
@@ -85,7 +120,6 @@ const DocumentsPage = () => {
 
   return (
     <div className="p-4">
-      {/* Button to open the modal */}
       <button
         className="btn"
         onClick={() => document.getElementById("uploadModal").showModal()}
@@ -100,7 +134,7 @@ const DocumentsPage = () => {
           documents.map((doc) => (
             <div className="card bg-base-300 shadow-xl" key={doc._id}>
               <figure className="h-48 overflow-hidden">
-                {renderDocumentPreview(doc)} {/* Render document preview */}
+                {renderDocumentPreview(doc)}
               </figure>
               <div className="card-body">
                 <h2 className="card-title">
@@ -110,43 +144,28 @@ const DocumentsPage = () => {
                 <p>{`Size: ${formatFileSize(doc.documentSize)}`}</p>
                 <div className="card-actions flex justify-between items-center">
                   <div className="badge badge-outline">{doc.documentType}</div>
-
-                  {/* Three-Dot Menu */}
-                  <div className="dropdown dropdown-end">
-                    <div
-                      tabIndex={0}
-                      role="button"
-                      className="btn btn-sm btn-ghost"
+                  <button
+                    className="btn btn-sm btn-ghost"
+                    onClick={() => {
+                      setSelectedDocument(doc);
+                      setIsMenuModalOpen(true); // Open modal using state
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-6 h-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                        />
-                      </svg>
-                    </div>
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
-                    >
-                      <li>
-                        <button onClick={() => handleDelete(doc._id)}>
-                          Delete
-                        </button>
-                      </li>
-                      <li>
-                        <button>Share</button>
-                      </li>
-                    </ul>
-                  </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -155,6 +174,28 @@ const DocumentsPage = () => {
           <p>No documents found.</p>
         )}
       </div>
+
+      {/* Popup for notifications */}
+      {toastMessage && (
+        <Popup message={toastMessage} type={toastType} duration={3000} />
+      )}
+
+      {/* Document Menu Modal */}
+      {selectedDocument && isMenuModalOpen && (
+        <DocumentMenuModal
+          document={selectedDocument}
+          shareEmail={shareEmail}
+          setShareEmail={setShareEmail}
+          onDelete={handleDelete}
+          onShare={handleShare}
+          onRemoveAccess={handleRemoveAccess} // Pass the function here
+          onClose={() => {
+            setSelectedDocument(null);
+            setShareEmail("");
+            setIsMenuModalOpen(false); // Close modal using state
+          }}
+        />
+      )}
     </div>
   );
 };

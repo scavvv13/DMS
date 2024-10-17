@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Use Link for routing
-import { useUser } from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Use Link and useNavigate for routing
+import { useUser } from "../contexts/UserContext"; // Import user context
 import {
   HiUsers,
   HiHome,
@@ -13,16 +12,18 @@ import miaa from "../assets/miaa.png"; // Adjust the path if needed
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useUser(); // Get logout function from context
+  const { logout, user } = useUser(); // Get logout function and user from context
   const navigate = useNavigate(); // Hook for navigation
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
+
   const handleLogout = () => {
     logout(); // Call the logout function
     navigate("/LoginPage"); // Redirect to login page after logout
   };
+
   return (
     <>
       {/* Sidebar Toggle Button for Mobile */}
@@ -75,20 +76,26 @@ const Sidebar = () => {
 
         {/* Nav Items */}
         <nav className="flex flex-col items-center justify-center flex-grow">
-          <Link
-            to="/admin/DashboardPage"
-            className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
-          >
-            <HiHome className="mr-2" />
-            Dashboard
-          </Link>
-          <Link
-            to="/admin/UsersPage"
-            className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
-          >
-            <HiUsers className="mr-2" />
-            Users
-          </Link>
+          {user &&
+            user.role === "admin" && ( // Ensure user exists and has admin role
+              <>
+                <Link
+                  to="/admin/DashboardPage"
+                  className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
+                >
+                  <HiHome className="mr-2" />
+                  Dashboard
+                </Link>
+                <Link
+                  to="/admin/UsersPage"
+                  className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
+                >
+                  <HiUsers className="mr-2" />
+                  Users
+                </Link>
+              </>
+            )}
+
           <Link
             to="/admin/DocumentsPage"
             className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
@@ -113,11 +120,9 @@ const Sidebar = () => {
         </nav>
 
         {/* Logout Button */}
-        <div className=" mb-5">
-          {" "}
-          {/* Adjusted margin-top here */}
+        <div className="mb-5">
           <button
-            className="py-2  rounded-md btn btn-outline btn-primary w-25 h-3 hover:bg-primary hover:text-white transition duration-200"
+            className="py-2 rounded-md btn btn-outline btn-primary w-25 h-3 hover:bg-primary hover:text-white transition duration-200"
             onClick={handleLogout}
           >
             Logout

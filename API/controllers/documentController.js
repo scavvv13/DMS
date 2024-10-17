@@ -1,5 +1,6 @@
 const DocumentModel = require("../models/DocumentModel");
 const bucket = require("../config/firebase");
+const UserModel = require("../models/UserModel");
 const { v4: uuidv4 } = require("uuid");
 const { getSignedUrl } = require("@google-cloud/storage");
 
@@ -106,5 +107,71 @@ exports.deleteDocument = async (req, res) => {
     res.status(200).json({ message: "Document deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Error deleting document", error: err });
+  }
+};
+
+// Share Document
+exports.shareDocument = async (req, res) => {
+  try {
+    const { email } = req.body; // Get email from request body
+    const { id } = req.params;
+
+    const document = await DocumentModel.findById(id);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    // Find user by email
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if user already has access
+    if (document.haveAccess.includes(user._id)) {
+      return res.status(400).json({ message: "User already has access" });
+    }
+
+    // Add user to haveAccess array
+    document.haveAccess.push(user._id);
+    await document.save();
+
+    res.status(200).json({ message: "Document shared successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error sharing document", error: err });
+  }
+};
+
+// Remove Access
+exports.removeAccess = async (req, res) => {
+  try {
+    const { email } = req.body; // Get email from request body
+    const { id } = req.params;
+
+    const document = await DocumentModel.findById(id);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    // Find user by email
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if user has access
+    if (!document.haveAccess.includes(user._id)) {
+      return res.status(400).json({ message: "User does not have access" });
+    }
+
+    // Remove user from haveAccess array
+    document.haveAccess = document.haveAccess.filter(
+      (userId) => !userId.equals(user._id)
+    );
+    await document.save();
+
+    res.status(200).json({ message: "Access removed successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error removing access", error: err });
   }
 };
