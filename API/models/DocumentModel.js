@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 
 const DocumentSchema = new mongoose.Schema(
   {
+    documentImageURL: {
+      type: String,
+    },
     documentName: {
       type: String,
       required: [true, "Document name is required"],
@@ -16,7 +19,6 @@ const DocumentSchema = new mongoose.Schema(
     documentType: {
       type: String,
       required: [true, "Document type is required"],
-      enum: ["PDF", "DOCX", "XLSX", "TXT", "Other"],
     },
     documentPath: {
       type: String,
@@ -27,12 +29,7 @@ const DocumentSchema = new mongoose.Schema(
       ref: "User", // Assuming you have a User model
       required: [true, "Uploader is required"],
     },
-    haveAccess: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // List of users who have access
-      },
-    ],
+    haveAccess: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
