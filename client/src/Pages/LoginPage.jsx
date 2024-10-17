@@ -1,13 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import miaa from "../assets/miaa.png";
 import { useUser } from "../contexts/UserContext"; // Import the context
 
 const LoginPage = () => {
-  const { login, loading, error } = useUser(); // Destructure login, loading, error from context
+  const { user, login, loading, error, fetchUserData } = useUser(); // Destructure login, loading, error from context
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Hook for navigation
+
+  // Check if the user is already logged in and redirect based on their role
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    // If token exists and hasn't expired, fetch the user data
+    if (token) {
+      const fetchUser = async () => {
+        const loggedInUser = await fetchUserData(); // Fetch user data if token exists
+
+        // If user data is found, redirect based on role
+        if (loggedInUser && loggedInUser.role) {
+          if (loggedInUser.role === "admin") {
+            navigate("/admin/UsersPage"); // Redirect to admin dashboard
+          } else if (loggedInUser.role === "user") {
+            navigate("/user/DashboardPage"); // Redirect to user dashboard
+          }
+        }
+      };
+
+      fetchUser();
+    }
+  }, [navigate, fetchUserData]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

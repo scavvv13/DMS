@@ -64,6 +64,22 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/user"
+            element={
+              <ProtectedRoute requiredRole="user">
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/DashboardPage"
+            element={
+              <ProtectedRoute requiredRole="user">
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>
