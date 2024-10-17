@@ -54,9 +54,18 @@ exports.postDocument = async (req, res) => {
 };
 
 // Get Documents (with Signed URLs)
+// Get Documents (with Signed URLs)
 exports.getDocuments = async (req, res) => {
   try {
-    const documents = await DocumentModel.find()
+    const userId = req.user.id; // Get the user ID from the request
+
+    // Find documents uploaded by the user or shared with them
+    const documents = await DocumentModel.find({
+      $or: [
+        { documentUploader: userId }, // Documents uploaded by the user
+        { haveAccess: userId }, // Documents shared with the user
+      ],
+    })
       .populate("documentUploader", "name email")
       .populate("haveAccess", "name email");
 

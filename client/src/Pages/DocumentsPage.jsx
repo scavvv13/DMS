@@ -11,7 +11,7 @@ const DocumentsPage = () => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await axiosInstance.get("/documents");
+        const response = await axiosInstance.get("/documents"); // Fetch documents from the server
         console.log("Fetched documents:", response.data);
         setDocuments(response.data.documents); // Access the documents array
       } catch (error) {
@@ -20,12 +20,19 @@ const DocumentsPage = () => {
     };
 
     fetchDocuments();
-  }, []);
+  }, [user.id]); // Include user.id in dependency array to refetch if user changes
+
+  // File size formatter function
+  const formatFileSize = (bytes) => {
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+  };
 
   // Refresh documents list after any action (like delete)
   const refreshDocuments = async () => {
     try {
-      const response = await axiosInstance.get("/documents");
+      const response = await axiosInstance.get("/documents"); // Fetch documents from the server
       setDocuments(response.data.documents); // Access the documents array
     } catch (error) {
       console.error("Error refreshing documents:", error);
@@ -100,7 +107,7 @@ const DocumentsPage = () => {
                   {doc.documentName}
                   <div className="badge badge-secondary">NEW</div>
                 </h2>
-                <p>{`Size: ${doc.documentSize} bytes`}</p>
+                <p>{`Size: ${formatFileSize(doc.documentSize)}`}</p>
                 <div className="card-actions flex justify-between items-center">
                   <div className="badge badge-outline">{doc.documentType}</div>
 
