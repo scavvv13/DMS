@@ -6,7 +6,6 @@ import UploadDocumentModal from "../components/UploadDocumentModal"; // Import t
 const DocumentsPage = () => {
   const { user } = useUser(); // Get user data to ensure authorization
   const [documents, setDocuments] = useState([]);
-  const [showModal, setShowModal] = useState(false);
 
   // Fetch documents on component mount
   useEffect(() => {
@@ -43,31 +42,58 @@ const DocumentsPage = () => {
     }
   };
 
+  // Function to render a preview based on document type
+  const renderDocumentPreview = (doc) => {
+    const fileType = doc.documentType;
+
+    if (fileType.includes("image")) {
+      return (
+        <img
+          src={doc.documentImageURL} // Use the image URL for images
+          alt={doc.documentName}
+          className="w-full h-full object-cover"
+        />
+      );
+    } else if (fileType.includes("pdf")) {
+      return (
+        <div className="w-full h-full overflow-hidden">
+          <iframe
+            src={doc.documentImageURL} // Use the PDF URL for PDF previews
+            title="PDF Preview"
+            className="w-full h-full border-none"
+            style={{ overflow: "hidden" }} // Hide scrollbar
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex justify-center items-center h-48">
+          <p className="text-gray-500">
+            Preview not available for this file type.
+          </p>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="p-4">
       {/* Button to open the modal */}
-      <button className="btn" onClick={() => setShowModal(true)}>
+      <button
+        className="btn"
+        onClick={() => document.getElementById("uploadModal").showModal()}
+      >
         Upload File
       </button>
 
-      {/* Conditional rendering of UploadDocumentModal */}
-      {showModal && (
-        <UploadDocumentModal
-          onClose={() => setShowModal(false)}
-          refreshDocuments={refreshDocuments}
-        />
-      )}
+      <UploadDocumentModal refreshDocuments={refreshDocuments} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
         {Array.isArray(documents) && documents.length > 0 ? (
           documents.map((doc) => (
             <div className="card bg-base-300 shadow-xl" key={doc._id}>
               <figure className="h-48 overflow-hidden">
-                <img
-                  src={doc.documentImageURL} // Use the correct key
-                  alt={doc.documentName}
-                  className="w-full h-full object-cover"
-                />
+                {renderDocumentPreview(doc)} {/* Render document preview */}
               </figure>
               <div className="card-body">
                 <h2 className="card-title">
