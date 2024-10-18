@@ -292,7 +292,7 @@ const UsersPage = () => {
           ) : (
             <tr>
               <td colSpan="4" className="text-center">
-                No users found.
+                Hey, no users found.
               </td>
             </tr>
           )}
