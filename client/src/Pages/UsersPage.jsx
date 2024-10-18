@@ -1,7 +1,10 @@
+// src/pages/UsersPage.js
+
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useUser } from "../contexts/UserContext";
 import Popup from "../components/Popup"; // Import your Popup component for notifications
+import UsersTable from "../components/UsersTable"; // Import UsersTable
 
 const UsersPage = () => {
   const { user } = useUser(); // Get user from context
@@ -16,21 +19,22 @@ const UsersPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem("token"); // Get token directly from localStorage
+        const token = localStorage.getItem("token");
 
         if (!token) {
           console.warn("No token found. Cannot fetch users.");
           setToastMessage("Session expired. Please log in again.");
           setToastType("error");
-          return; // Exit if there's no token
+          return;
         }
 
         const response = await axiosInstance.get("/user/users", {
-          headers: { Authorization: `Bearer ${token}` }, // Pass token for authentication
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.data.success) {
           setUsers(response.data.users);
+          console.log(response.data.users); // Log user data here
         } else {
           setToastMessage("Failed to fetch users");
           setToastType("error");
@@ -40,12 +44,12 @@ const UsersPage = () => {
         setToastMessage("Error fetching users.");
         setToastType("error");
       } finally {
-        setLoading(false); // Stop loading once data is fetched
+        setLoading(false);
       }
     };
 
     fetchUsers();
-  }, []); // No dependencies needed since we're getting the token directly
+  }, []);
 
   const deleteUser = async (email) => {
     setLoading(true); // Set loading state
@@ -148,7 +152,7 @@ const UsersPage = () => {
       }
 
       const response = await axiosInstance.post(
-        `/user/users/batch-delete`,
+        "/user/users/batch-delete",
         { emails: selectedUsers },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -159,7 +163,7 @@ const UsersPage = () => {
         setUsers(users.filter((user) => !selectedUsers.includes(user.email)));
         setToastMessage("Selected users deleted successfully.");
         setToastType("success");
-        setSelectedUsers([]); // Clear selected users after deletion
+        setSelectedUsers([]); // Clear selection after deletion
       } else {
         setToastMessage("Failed to delete selected users.");
         setToastType("error");
@@ -173,133 +177,33 @@ const UsersPage = () => {
     }
   };
 
-  // Loading and error handling
-  if (loading) {
-    return <div>Loading user data...</div>;
-  }
-
   return (
-    <div className="overflow-x-auto">
-      <button
-        className="btn mb-4"
-        onClick={deleteSelectedUsers}
-        disabled={selectedUsers.length === 0}
-      >
-        Delete Selected Users
-      </button>
-      <table className="table w-full">
-        <thead>
-          <tr>
-            <th>
-              <label>
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  onChange={() => {
-                    // Check/uncheck all users
-                    if (selectedUsers.length === users.length) {
-                      setSelectedUsers([]); // Unselect all
-                    } else {
-                      setSelectedUsers(users.map((user) => user.email)); // Select all
-                    }
-                  }}
-                  checked={selectedUsers.length === users.length}
-                />
-              </label>
-            </th>
-            <th>Name</th>
-            <th>Role</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(users) && users.length > 0 ? (
-            users.map((user) => (
-              <tr key={user.email}>
-                <th>
-                  <label>
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      checked={selectedUsers.includes(user.email)}
-                      onChange={() => handleSelectUser(user.email)}
-                    />
-                  </label>
-                </th>
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div className="avatar">
-                      <div className="mask mask-squircle h-12 w-12">
-                        <img
-                          src={`https://api.adorable.io/avatars/285/${user.email}.png`}
-                          alt="User Avatar"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="font-bold">{user.name}</div>
-                      <div className="text-sm opacity-50">{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span className="badge badge-secondary badge-outline badge-sm">
-                    {user.role}
-                  </span>
-                </td>
-                <th>
-                  <button
-                    className="btn btn-ghost btn-xs"
-                    onClick={() => deleteUser(user.email)}
-                  >
-                    Delete
-                  </button>
-                  <div className="relative inline-block text-left">
-                    <div>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-xs"
-                        onClick={() => toggleDropdown(user.email)}
-                      >
-                        {user.role === "admin" ? "Remove Admin" : "Make Admin"}
-                      </button>
-                    </div>
-                    {dropdownOpen === user.email && (
-                      <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg">
-                        <div className="py-1">
-                          <button
-                            className="block px-4 py-2 text-sm text-gray-700"
-                            onClick={() =>
-                              handleAdminToggle(
-                                user.email,
-                                user.role === "admin"
-                                  ? "revokeAdmin"
-                                  : "makeAdmin"
-                              )
-                            }
-                          >
-                            {user.role === "admin"
-                              ? "Remove Admin"
-                              : "Make Admin"}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </th>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="4" className="text-center">
-                Hey, no users found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <div className="container mx-auto p-4">
+      {loading ? (
+        <div>Loading...</div> // Replace with a loading spinner or skeleton if needed
+      ) : (
+        <>
+          <h1 className="text-2xl font-bold mb-4">Users</h1>
+          <button
+            className="btn btn-error mb-4"
+            onClick={deleteSelectedUsers}
+            disabled={selectedUsers.length === 0} // Disable if no users are selected
+          >
+            Delete Selected Users
+          </button>
+          <UsersTable
+            users={users}
+            selectedUsers={selectedUsers}
+            handleSelectUser={handleSelectUser}
+            deleteUser={deleteUser}
+            toggleDropdown={toggleDropdown}
+            dropdownOpen={dropdownOpen}
+            handleAdminToggle={handleAdminToggle}
+          />
+        </>
+      )}
       <Popup message={toastMessage} type={toastType} />{" "}
-      {/* Add the Popup component */}
+      {/* Your Popup for notifications */}
     </div>
   );
 };

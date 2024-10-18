@@ -1,4 +1,3 @@
-// components/RegisterPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import miaa from "../assets/miaa.png";
@@ -9,6 +8,7 @@ const RegisterPage = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null); // State to handle profile picture
   const [error, setError] = useState(null); // To display error messages
   const [loading, setLoading] = useState(false); // To handle loading state
   const navigate = useNavigate();
@@ -27,11 +27,20 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      // Make API call to register the user
-      const response = await axiosInstance.post("/auth/register", {
-        name,
-        email,
-        password,
+      // Create form data to handle text and file data
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      if (profilePicture) {
+        formData.append("profilePicture", profilePicture); // Append the profile picture file
+      }
+
+      // Make API call to register the user with formData
+      const response = await axiosInstance.post("/auth/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Set proper headers for file uploads
+        },
       });
 
       console.log("Registration successful:", response.data);
@@ -44,6 +53,10 @@ const RegisterPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleProfilePictureChange = (e) => {
+    setProfilePicture(e.target.files[0]); // Set the selected file as profile picture
   };
 
   return (
@@ -100,6 +113,17 @@ const RegisterPage = () => {
                 className="input input-bordered"
                 onChange={(e) => setConfirmPassword(e.target.value)} // Set confirm password state
                 required
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Profile Picture</span>
+              </label>
+              <input
+                type="file"
+                className="input input-bordered"
+                accept="image/*" // Accept image files only
+                onChange={handleProfilePictureChange} // Handle file selection
               />
             </div>
             {error && <p className="text-red-500">{error}</p>}{" "}

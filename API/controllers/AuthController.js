@@ -1,11 +1,14 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
+const bucket = require("../config/firebase");
 
 // Registration Controller
 const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const file = req.file; // Assuming you're using multer to handle the profile picture upload
 
     // Validate required fields
     if (!name || !email || !password) {
@@ -29,8 +32,51 @@ const register = async (req, res) => {
         .json({ message: "User with this email already exists" });
     }
 
-    // Create new user
-    const user = new User({ name, email, password, role });
+    let profilePictureUrl = ""; // Placeholder for profile image URL
+
+    // If a file (profile picture) is uploaded
+    if (file) {
+      // Upload profile picture to Firebase Cloud Storage
+      const blob = bucket.file(`${uuidv4()}-${file.originalname}`);
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+      });
+
+      blobStream.on("error", (err) => {
+        return res
+          .status(500)
+          .json({ message: "Profile picture upload failed", error: err });
+      });
+
+      // Upload completion handler
+      const uploadPromise = new Promise((resolve, reject) => {
+        blobStream.on("finish", async () => {
+          try {
+            const signedUrlArray = await blob.getSignedUrl({
+              action: "read", // Make it publicly accessible
+              expires: "03-01-2500", // Long expiration date
+            });
+            profilePictureUrl = signedUrlArray[0]; // Get the URL
+            resolve(); // Resolve the promise when done
+          } catch (err) {
+            reject(err); // Handle error in signed URL generation
+          }
+        });
+      });
+
+      blobStream.end(file.buffer); // End stream and upload the image
+      await uploadPromise; // Wait for the upload and URL generation to complete
+    }
+
+    // Create new user with profile picture URL
+    const user = new User({
+      name,
+      email,
+      password,
+      role,
+      profilePictureUrl, // Save the uploaded profile image URL in MongoDB
+    });
+
     await user.save();
 
     // Generate token
@@ -47,6 +93,7 @@ const register = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
+        profilePictureUrl, // Include profile image URL in the response
       },
     });
   } catch (error) {

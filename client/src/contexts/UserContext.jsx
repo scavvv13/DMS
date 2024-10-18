@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import axiosInstance from "../utils/axiosInstance"; // Ensure this points to your Axios instance
+import axiosInstance from "../utils/axiosInstance";
 
 // Create the UserContext
 const UserContext = createContext();
@@ -35,8 +35,15 @@ export const UserContextProvider = ({ children }) => {
     try {
       const response = await axiosInstance.get("/user/profile");
       if (response.data.success) {
-        setUser(response.data.user); // Set user data
-        return response.data.user; // Return user data
+        const userData = response.data.user;
+        setUser({
+          id: userData.id, // Corrected from _id to id
+          name: userData.name,
+          email: userData.email,
+          role: userData.role,
+          profilePictureUrl: userData.profilePicture, // Match the backend naming
+        });
+        return userData; // Return user data
       } else {
         console.error("Failed to fetch user profile:", response.data);
         setError(response.data.message || "Failed to fetch user data.");

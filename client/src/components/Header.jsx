@@ -16,7 +16,9 @@ const Header = () => {
 
     if (user) {
       setToken(true);
-      setRoleBadge(user.role); // Set role badge based on user role
+      setRoleBadge(user.role);
+      console.log("User data:", user);
+      // Set role badge based on user role
     } else {
       setToken(false);
       setRoleBadge("");
@@ -40,7 +42,7 @@ const Header = () => {
           </div>
         )}
       </div>
-      <div className=" bg-base-300 p-3 m-0 rounded-2xl shadow-lg ">
+      <div className="bg-base-300 p-3 m-0 rounded-2xl shadow-lg">
         <div className="join mr-10">
           <input
             className="input input-bordered join-item"
@@ -125,7 +127,22 @@ const Header = () => {
           <div className="avatar btn-primary">
             <div className="ring-primary ring-offset-base-100 w-11 rounded-full ring ring-offset-2 mx-3">
               <img
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                src={
+                  user.profilePictureUrl || (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="size-6"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  )
+                } // Fallback to the default SVG if profilePictureUrl is not available
                 alt="User Avatar"
               />
             </div>
