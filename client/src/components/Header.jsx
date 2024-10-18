@@ -31,7 +31,7 @@ const Header = () => {
   };
 
   return (
-    <div className="navbar bg-base rounded-md container">
+    <div className="navbar bg-base-100 rounded-md container m-0 p-0 mt-1">
       <div className="navbar-start">
         <p className="font-bold text-3xl ml-3">{user ? `${user.name}` : ""}</p>
         {roleBadge && (
@@ -40,7 +40,7 @@ const Header = () => {
           </div>
         )}
       </div>
-      <div className=" bg-base-300 p-3 rounded-2xl shadow-lg ">
+      <div className=" bg-base-300 p-3 m-0 rounded-2xl shadow-lg ">
         <div className="join mr-10">
           <input
             className="input input-bordered join-item"

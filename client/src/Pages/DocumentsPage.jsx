@@ -2,30 +2,45 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useUser } from "../contexts/UserContext";
 import UploadDocumentModal from "../components/UploadDocumentModal";
-import DocumentMenuModal from "../components/DocumentMenuModal"; // Import the new modal
-import Popup from "../components/Popup"; // Import your Popup component for notifications
+import DocumentMenuModal from "../components/DocumentMenuModal";
+import Popup from "../components/Popup";
+import pdf from "../assets/file.png";
 
 const DocumentsPage = () => {
   const { user } = useUser();
   const [documents, setDocuments] = useState([]);
-  const [selectedDocument, setSelectedDocument] = useState(null); // State for selected document
+  const [selectedDocument, setSelectedDocument] = useState(null);
   const [shareEmail, setShareEmail] = useState("");
-  const [toastMessage, setToastMessage] = useState(""); // State for toast message
-  const [toastType, setToastType] = useState(""); // State for toast type
-  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false); // State for managing modal visibility
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state for documents
 
   useEffect(() => {
+    console.log("User token:", user?.token);
     const fetchDocuments = async () => {
+      if (!user) {
+        setToastMessage("You need to be logged in to view documents.");
+        setToastType("error");
+        return;
+      }
+
+      setLoading(true); // Set loading to true while fetching
       try {
         const response = await axiosInstance.get("/documents");
         setDocuments(response.data.documents);
+        console.log("User token:", user?.token);
       } catch (error) {
         console.error("Error fetching documents:", error);
+        setToastMessage("Failed to fetch documents. Please try again.");
+        setToastType("error");
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
     fetchDocuments();
-  }, []);
+  }, [user]); // Depend on user to refetch when user state changes
 
   const formatFileSize = (bytes) => {
     const sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -34,15 +49,19 @@ const DocumentsPage = () => {
   };
 
   const refreshDocuments = async () => {
+    if (!user) return; // Check if user is logged in
     try {
       const response = await axiosInstance.get("/documents");
       setDocuments(response.data.documents);
     } catch (error) {
       console.error("Error refreshing documents:", error);
+      setToastMessage("Failed to refresh documents.");
+      setToastType("error");
     }
   };
 
   const handleDelete = async (documentId) => {
+    if (!user) return; // Ensure user is logged in
     try {
       await axiosInstance.delete(`/documents/${documentId}`);
       setToastMessage("Document deleted successfully.");
@@ -50,12 +69,15 @@ const DocumentsPage = () => {
       refreshDocuments();
     } catch (error) {
       console.error("Error deleting document:", error);
-      setToastMessage(error.response.data.message);
+      setToastMessage(
+        error.response.data.message || "Failed to delete document."
+      );
       setToastType("error");
     }
   };
 
   const handleShare = async (documentId) => {
+    if (!user) return; // Ensure user is logged in
     try {
       const response = await axiosInstance.post(
         `/documents/${documentId}/share`,
@@ -67,12 +89,15 @@ const DocumentsPage = () => {
       refreshDocuments();
     } catch (error) {
       console.error("Error sharing document:", error);
-      setToastMessage(error.response.data.message);
+      setToastMessage(
+        error.response.data.message || "Failed to share document."
+      );
       setToastType("error");
     }
   };
 
   const handleRemoveAccess = async (documentId, email) => {
+    if (!user) return; // Ensure user is logged in
     try {
       await axiosInstance.post(`/documents/${documentId}/remove-access`, {
         email,
@@ -82,7 +107,9 @@ const DocumentsPage = () => {
       refreshDocuments();
     } catch (error) {
       console.error("Error removing access:", error);
-      setToastMessage(error.response.data.message);
+      setToastMessage(
+        error.response.data.message || "Failed to remove access."
+      );
       setToastType("error");
     }
   };
@@ -109,70 +136,87 @@ const DocumentsPage = () => {
       );
     } else {
       return (
-        <div className="flex justify-center items-center h-48">
-          <p className="text-gray-500">
-            Preview not available for this file type.
-          </p>
+        <div className="flex justify-center items-center h-36">
+          <img
+            src={pdf}
+            className="text-gray-500 text-sm w-20"
+            alt="File type icon"
+          />
         </div>
       );
     }
   };
 
   return (
-    <div className="p-4">
-      <button
-        className="btn"
-        onClick={() => document.getElementById("uploadModal").showModal()}
-      >
-        Upload File
-      </button>
+    <div className="p-0 flex flex-col h-[435px]">
+      {/* Non-scrollable upload button */}
+      <div className="mb-4">
+        <button
+          className="btn"
+          onClick={() => document.getElementById("uploadModal").showModal()}
+        >
+          Upload File
+        </button>
+      </div>
 
-      <UploadDocumentModal refreshDocuments={refreshDocuments} />
+      {/* Scrollable document cards container */}
+      <div className="flex overflow-y-auto no-scrollbar">
+        <UploadDocumentModal refreshDocuments={refreshDocuments} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-        {Array.isArray(documents) && documents.length > 0 ? (
-          documents.map((doc) => (
-            <div className="card bg-base-300 shadow-xl" key={doc._id}>
-              <figure className="h-48 overflow-hidden">
-                {renderDocumentPreview(doc)}
-              </figure>
-              <div className="card-body">
-                <h2 className="card-title">
-                  {doc.documentName}
-                  <div className="badge badge-secondary">NEW</div>
-                </h2>
-                <p>{`Size: ${formatFileSize(doc.documentSize)}`}</p>
-                <div className="card-actions flex justify-between items-center">
-                  <div className="badge badge-outline">{doc.documentType}</div>
-                  <button
-                    className="btn btn-sm btn-ghost"
-                    onClick={() => {
-                      setSelectedDocument(doc);
-                      setIsMenuModalOpen(true); // Open modal using state
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
+        {/* Grid layout adjusted for 5 cards per row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
+          {loading ? (
+            <p>Loading documents...</p>
+          ) : Array.isArray(documents) && documents.length > 0 ? (
+            documents.map((doc) => (
+              <div
+                className="card bg-base-300 shadow-xl compact-card"
+                key={doc._id}
+              >
+                <figure className="h-36 overflow-hidden">
+                  {renderDocumentPreview(doc)}
+                </figure>
+                <div className="card-body p-2">
+                  <h2 className="card-title text-sm font-semibold">
+                    {doc.documentName}
+                  </h2>
+                  <p className="text-xs">{`Size: ${formatFileSize(
+                    doc.documentSize
+                  )}`}</p>
+                  <div className="card-actions flex justify-between items-center mt-2">
+                    <div className="badge badge-outline-red ml-1">
+                      {doc.documentType}
+                    </div>
+                    <button
+                      className="btn btn-sm btn-ghost p-1"
+                      onClick={() => {
+                        setSelectedDocument(doc);
+                        setIsMenuModalOpen(true); // Open modal using state
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p>No documents found.</p>
-        )}
+            ))
+          ) : (
+            <p>No documents found.</p>
+          )}
+        </div>
       </div>
 
       {/* Popup for notifications */}

@@ -4,7 +4,7 @@ import miaa from "../assets/miaa.png";
 import { useUser } from "../contexts/UserContext"; // Import the context
 
 const LoginPage = () => {
-  const { user, login, loading, error, fetchUserData } = useUser(); // Destructure login, loading, error from context
+  const { user, login, loading, error, fetchUserData } = useUser(); // Destructure context
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Hook for navigation
@@ -13,18 +13,18 @@ const LoginPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    // If token exists and hasn't expired, fetch the user data
+    // If token exists, fetch the user data
     if (token) {
       const fetchUser = async () => {
-        const loggedInUser = await fetchUserData(); // Fetch user data if token exists
+        const loggedInUser = await fetchUserData();
 
         // If user data is found, redirect based on role
         if (loggedInUser && loggedInUser.role) {
-          if (loggedInUser.role === "admin") {
-            navigate("/admin/UsersPage"); // Redirect to admin dashboard
-          } else if (loggedInUser.role === "user") {
-            navigate("/user/DashboardPage"); // Redirect to user dashboard
-          }
+          navigate(
+            loggedInUser.role === "admin"
+              ? "/admin/UsersPage"
+              : "/user/DashboardPage"
+          );
         }
       };
 
@@ -36,16 +36,18 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      // Call the login function from context and get the user object
-      const loggedInUser = await login(email, password);
+      // Call the login function from context and get the user object and token
+      const { user: loggedInUser, token } = await login(email, password);
+
+      console.log("User Token:", token); // Log the token to the console for checking
 
       // Check the user's role and navigate accordingly
       if (loggedInUser && loggedInUser.role) {
-        if (loggedInUser.role === "admin") {
-          navigate("/admin/UsersPage"); // Redirect to admin dashboard
-        } else if (loggedInUser.role === "user") {
-          navigate("/user/DashboardPage"); // Redirect to user dashboard
-        }
+        navigate(
+          loggedInUser.role === "admin"
+            ? "/admin/UsersPage"
+            : "/user/DashboardPage"
+        );
       } else {
         console.error("User role not found.");
       }
@@ -87,7 +89,7 @@ const LoginPage = () => {
               />
             </div>
             {error && <p className="text-red-500">{error}</p>}{" "}
-            {/* Display error message if any */}
+            {/* Display error message */}
             <div className="form-control mt-6">
               <button
                 className="btn btn-primary"

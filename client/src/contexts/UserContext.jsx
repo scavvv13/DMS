@@ -7,7 +7,7 @@ const UserContext = createContext();
 // Provide UserContext to the rest of the app
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // To manage login errors
 
   // Fetch user data on initial load
@@ -16,7 +16,7 @@ export const UserContextProvider = ({ children }) => {
 
     if (token) {
       axiosInstance.defaults.headers.Authorization = `Bearer ${token}`;
-      fetchUserData().then(() => {
+      fetchUserData().finally(() => {
         setLoading(false); // Only set loading to false after fetching user data
       });
     } else {
@@ -27,29 +27,27 @@ export const UserContextProvider = ({ children }) => {
   const fetchUserData = async () => {
     const token = localStorage.getItem("token"); // Retrieve token
 
-    if (token) {
-      axiosInstance.defaults.headers.Authorization = `Bearer ${token}`; // Set token in header
-    } else {
+    if (!token) {
       console.warn("No token found. User data cannot be fetched.");
       return null; // Return early if there's no token
     }
 
     try {
       const response = await axiosInstance.get("/user/profile");
-
       if (response.data.success) {
-        // Check if the request was successful
         setUser(response.data.user); // Set user data
         return response.data.user; // Return user data
       } else {
-        console.error("Failed to fetch user profile:", response.data); // Log error message
-        return null; // Return null if the profile fetch failed
+        console.error("Failed to fetch user profile:", response.data);
+        setError(response.data.message || "Failed to fetch user data.");
+        return null;
       }
     } catch (err) {
       console.error("Failed to fetch user profile", err);
       setUser(null);
       localStorage.removeItem("token"); // Clear invalid token
-      return null; // Return null if fetching profile fails
+      setError("Session expired. Please log in again.");
+      return null;
     }
   };
 
@@ -62,15 +60,15 @@ export const UserContextProvider = ({ children }) => {
         password,
       });
 
-      // Save the token in localStorage and set the Authorization header
+      // Securely save the token in localStorage and set the Authorization header
       localStorage.setItem("token", data.token);
       axiosInstance.defaults.headers.Authorization = `Bearer ${data.token}`;
 
-      // Fetch the user's profile and return the user data
-      const profileResponse = await fetchUserData(); // Fetch user data after successful login
-
-      return profileResponse; // Return the user data (including role)
+      // Fetch the user's profile and return both user data and token
+      const userData = await fetchUserData(); // Fetch user data after successful login
+      return { user: userData, token: data.token }; // Return user data and token
     } catch (err) {
+      console.error("Login error:", err);
       setError("Login failed. Please check your credentials.");
       return null; // Return null in case of error
     } finally {
@@ -81,7 +79,8 @@ export const UserContextProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token"); // Remove token
     setUser(null); // Reset user state
-    axiosInstance.defaults.headers.Authorization = ""; // Clear the Authorization header
+    delete axiosInstance.defaults.headers.Authorization; // Clear the Authorization header
+    setError(null); // Clear any errors on logout
   };
 
   return (
