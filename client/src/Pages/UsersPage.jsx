@@ -183,7 +183,6 @@ const UsersPage = () => {
         <div>Loading...</div> // Replace with a loading spinner or skeleton if needed
       ) : (
         <>
-          <h1 className="text-2xl font-bold mb-4">Users</h1>
           <button
             className="btn btn-error mb-4"
             onClick={deleteSelectedUsers}

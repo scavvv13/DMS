@@ -148,8 +148,8 @@ const DocumentsPage = () => {
   };
 
   return (
-    <div className="p-0 flex flex-col h-[435px]">
-      {/* Non-scrollable upload button */}
+    <div className="p-0 flex flex-col h-full">
+      {/* Upload button - Fixed at the top */}
       <div className="mb-4">
         <button
           className="btn"
@@ -160,7 +160,7 @@ const DocumentsPage = () => {
       </div>
 
       {/* Scrollable document cards container */}
-      <div className="flex overflow-y-auto no-scrollbar">
+      <div className="flex-1 overflow-y-auto no-scrollbar">
         <UploadDocumentModal refreshDocuments={refreshDocuments} />
 
         {/* Grid layout adjusted for 5 cards per row */}
@@ -232,7 +232,7 @@ const DocumentsPage = () => {
           setShareEmail={setShareEmail}
           onDelete={handleDelete}
           onShare={handleShare}
-          onRemoveAccess={handleRemoveAccess} // Pass the function here
+          onRemoveAccess={handleRemoveAccess}
           onClose={() => {
             setSelectedDocument(null);
             setShareEmail("");
