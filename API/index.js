@@ -7,6 +7,7 @@ require("dotenv").config();
 const authRoutes = require("./routes/AuthRoutes");
 const userRoutes = require("./routes/UserRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const memoRoutes = require("./routes/MemoRoutes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/", documentRoutes);
+app.use("/api/", memoRoutes);
 
 // Database connection
 mongoose

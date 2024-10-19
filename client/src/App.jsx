@@ -11,6 +11,7 @@ import ProfilePage from "./Pages/ProfilePage";
 import ProtectedRoute from "./auth/ProtectedRoutes";
 import DashboardPage from "./Pages/DashboardPage";
 import UnauthorizedPage from "./Pages/UnauthorizedPage";
+import MemosPage from "./Pages/MemosPage";
 
 const App = () => {
   return (
@@ -77,6 +78,14 @@ const App = () => {
             element={
               <ProtectedRoute requiredRoles={["user"]}>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/MemosPage"
+            element={
+              <ProtectedRoute requiredRoles={["admin"]}>
+                <MemosPage />
               </ProtectedRoute>
             }
           />
