@@ -125,9 +125,9 @@ const MemosPage = () => {
           memos.map((memo) => (
             <div
               key={memo._id} // Use unique identifier as key
-              className="card bg-base-300 shadow-lg rounded-lg p-4 relative hover:shadow-xl transition-shadow"
+              className="card bg-base-300 shadow-lg rounded-lg p-1  relative hover:shadow-xl transition-shadow"
             >
-              <div className="card-body">
+              <div className="card-body h-52 overflow-hidden">
                 <h2 className="card-title text-lg font-semibold">
                   {memo.MemoTitle}
                 </h2>
@@ -183,16 +183,16 @@ const MemosPage = () => {
 
       {/* Modal for adding/editing memos */}
       {isModalOpen && (
-        <dialog ref={modalRef} className="modal modal-open">
+        <dialog ref={modalRef} className="modal modal-open no-scrollbar">
           <form
             method="dialog"
-            className="modal-box"
+            className="modal-box no-scrollbar"
             onSubmit={editingMemo ? handleUpdate : handleSubmit}
           >
             <h2 className="font-bold text-lg mb-4">
               {editingMemo ? "Edit Memo" : "Add Memo"}
             </h2>
-            <div className="mb-4">
+            <div className="mb-4 no-scrollbar">
               <label className="block text-sm font-bold mb-2" htmlFor="title">
                 Memo Title
               </label>
