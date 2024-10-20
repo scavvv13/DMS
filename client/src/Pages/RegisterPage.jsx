@@ -121,7 +121,7 @@ const RegisterPage = () => {
               </label>
               <input
                 type="file"
-                className="input input-bordered"
+                className="file-input file-input-bordered file-input-primary w-full max-w-xs"
                 accept="image/*" // Accept image files only
                 onChange={handleProfilePictureChange} // Handle file selection
               />
