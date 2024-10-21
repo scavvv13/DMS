@@ -28,7 +28,7 @@ export const UserContextProvider = ({ children }) => {
     const token = localStorage.getItem("token"); // Retrieve token
 
     if (!token) {
-      console.warn("No token found. User data cannot be fetched.");
+      console.warn("No token found,. User data cannot be fetched.");
       return null; // Return early if there's no token
     }
 
