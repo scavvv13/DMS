@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../utils/axiosInstance";
 import { Link } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
 import {
@@ -22,9 +23,44 @@ ChartJS.register(
 );
 
 const DashboardPage = () => {
+  const [documentCount, setDocumentCount] = useState(0);
+  const [sharedCount, setSharedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showLates, setShowLates] = useState(false);
   const [showPerformance, setShowPerformance] = useState(false);
 
+  // Fetch document count on mount
+  useEffect(() => {
+    const fetchDocumentCount = async () => {
+      try {
+        const response = await axiosInstance.get("countDocuments");
+        setDocumentCount(response.data.count);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch document count.");
+      }
+    };
+
+    const fetchSharedDocumentsCount = async () => {
+      try {
+        const response = await axiosInstance.get("countSharedDocuments");
+        setSharedCount(response.data.count);
+      } catch (err) {
+        console.error("Error fetching shared documents count", err);
+        setError("Failed to load shared documents count.");
+      }
+    };
+
+    // Fetch both counts simultaneously
+    Promise.all([fetchDocumentCount(), fetchSharedDocumentsCount()])
+      .then(() => setLoading(false))
+      .catch((err) => setLoading(false));
+  }, []);
+
+  // Consolidate loading and error handling
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   // Sample data for employees (you can replace this with real data)
   const employeeWithMostLates = {
     name: "John Doe",
@@ -83,7 +119,7 @@ const DashboardPage = () => {
         <div className="card bg-base-100 shadow-md p-4">
           <div className="card-body">
             <h2 className="card-title text-sm">Total Documents</h2>
-            <p className="text-2xl font-bold">245</p>
+            <p className="text-2xl font-bold">{documentCount}</p>
             <p className="text-xs text-gray-500">Documents uploaded</p>
           </div>
         </div>
@@ -91,7 +127,7 @@ const DashboardPage = () => {
         <div className="card bg-base-100 shadow-md p-4">
           <div className="card-body">
             <h2 className="card-title text-sm">Documents Shared</h2>
-            <p className="text-2xl font-bold">132</p>
+            <p className="text-2xl font-bold">{sharedCount}</p>
             <p className="text-xs text-gray-500">Shared with others</p>
           </div>
         </div>

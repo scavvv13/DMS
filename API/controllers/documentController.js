@@ -175,3 +175,40 @@ exports.removeAccess = async (req, res) => {
     res.status(500).json({ message: "Error removing access", error: err });
   }
 };
+
+// Count total documents
+exports.countDocuments = async (req, res) => {
+  try {
+    // Use Mongoose's countDocuments method to count all documents
+    const documentCount = await DocumentModel.countDocuments();
+
+    res.status(200).json({
+      message: "Document count fetched successfully",
+      count: documentCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching document count",
+      error: err,
+    });
+  }
+};
+
+exports.countSharedDocuments = async (req, res) => {
+  try {
+    // Use MongoDB's $where operator to check if haveAccess array has at least one element
+    const sharedDocumentCount = await DocumentModel.countDocuments({
+      haveAccess: { $exists: true, $ne: [] }, // Checks that haveAccess exists and is not empty
+    });
+
+    res.status(200).json({
+      message: "Shared document count fetched successfully",
+      count: sharedDocumentCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching shared document count",
+      error: err,
+    });
+  }
+};
