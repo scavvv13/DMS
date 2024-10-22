@@ -19,7 +19,6 @@ const UsersTable = ({
             </label>
           </th>
           <th>Name</th>
-          <th>Email</th>
           <th>Role</th>
           <th>Actions</th>
         </tr>

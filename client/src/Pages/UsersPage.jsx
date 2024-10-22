@@ -1,15 +1,15 @@
-// src/pages/UsersPage.js
-
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useUser } from "../contexts/UserContext";
-import Popup from "../components/Popup"; // Import your Popup component for notifications
-import UsersTable from "../components/UsersTable"; // Import UsersTable
+import Popup from "../components/Popup";
+import UsersTable from "../components/UsersTable";
 
 const UsersPage = () => {
   const { user } = useUser(); // Get user from context
   const [users, setUsers] = useState([]); // State for storing users
+  const [filteredUsers, setFilteredUsers] = useState([]); // State for storing filtered users
   const [selectedUsers, setSelectedUsers] = useState([]); // State for storing selected users
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
   const [toastMessage, setToastMessage] = useState(""); // State for toast message
   const [toastType, setToastType] = useState(""); // State for toast type
   const [loading, setLoading] = useState(true); // Loading state
@@ -20,13 +20,7 @@ const UsersPage = () => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-
-        if (!token) {
-          console.warn("No token found. Cannot fetch users.");
-          setToastMessage("Session expired. Please log in again.");
-          setToastType("error");
-          return;
-        }
+        if (!token) throw new Error("No token found.");
 
         const response = await axiosInstance.get("/user/users", {
           headers: { Authorization: `Bearer ${token}` },
@@ -34,7 +28,7 @@ const UsersPage = () => {
 
         if (response.data.success) {
           setUsers(response.data.users);
-          console.log(response.data.users); // Log user data here
+          setFilteredUsers(response.data.users);
         } else {
           setToastMessage("Failed to fetch users");
           setToastType("error");
@@ -50,6 +44,16 @@ const UsersPage = () => {
 
     fetchUsers();
   }, []);
+
+  // Filter users based on search term
+  useEffect(() => {
+    const filtered = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
 
   const deleteUser = async (email) => {
     setLoading(true); // Set loading state
@@ -183,6 +187,15 @@ const UsersPage = () => {
         <div>Loading...</div> // Replace with a loading spinner or skeleton if needed
       ) : (
         <>
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input input-bordered w-full mb-4"
+          />
+
           <button
             className="btn btn-error mb-4"
             onClick={deleteSelectedUsers}
@@ -191,7 +204,7 @@ const UsersPage = () => {
             Delete Selected Users
           </button>
           <UsersTable
-            users={users}
+            users={filteredUsers}
             selectedUsers={selectedUsers}
             handleSelectUser={handleSelectUser}
             deleteUser={deleteUser}
