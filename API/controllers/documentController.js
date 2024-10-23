@@ -91,29 +91,43 @@ exports.getDocuments = async (req, res) => {
 };
 
 // Delete Document (from Firebase and MongoDB)
-exports.deleteDocument = async (req, res) => {
+// In documentController.js
+exports.deleteDocument = async (req, res = null) => {
   try {
     const { id } = req.params;
-
     const document = await DocumentModel.findById(id);
+
     if (!document) {
-      return res.status(404).json({ message: "Document not found" });
+      // If res is provided, send a response; otherwise, just return the error
+      if (res) {
+        return res.status(404).json({ message: "Document not found" });
+      } else {
+        throw new Error("Document not found");
+      }
     }
 
-    const file = bucket.file(document.documentPath);
-    await file.delete();
+    // Perform document deletion
     await DocumentModel.findByIdAndDelete(id);
 
-    // Create notification for document deletion
-    await createNotification(
-      document.documentUploader,
-      "Document Deleted",
-      `${document.documentName} has been deleted.`
-    );
+    // If res is provided, send success response
+    if (res) {
+      return res
+        .status(200)
+        .json({ success: true, message: "Document deleted successfully" });
+    }
 
-    res.status(200).json({ message: "Document deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting document", error: err });
+    // Return success if res is not provided
+    return { success: true, message: "Document deleted successfully" };
+  } catch (error) {
+    console.error(`Failed to delete document: ${req.params.id}`, error);
+
+    // If res is provided, send error response
+    if (res) {
+      return res.status(500).json({ message: "Failed to delete document" });
+    }
+
+    // Throw error to be caught by the calling function if res is not provided
+    throw new Error("Failed to delete document");
   }
 };
 

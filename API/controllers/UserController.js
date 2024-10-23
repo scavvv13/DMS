@@ -142,7 +142,7 @@ const batchDeleteUsers = async (req, res) => {
       // Delete each document associated with the user without passing `res`
       for (let doc of userDocuments) {
         try {
-          await deleteDocument({ params: { id: doc._id } }, null); // Ensure `res` is not passed
+          await deleteDocument({ params: { id: doc._id } }); // No need to pass res
         } catch (err) {
           console.error(`Failed to delete document ${doc._id}:`, err);
         }
