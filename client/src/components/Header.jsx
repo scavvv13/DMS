@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 
-const Header = () => {
+const Header = ({ searchTerm, setSearchTerm }) => {
   const { user } = useUser();
   const [token, setToken] = useState(!!user); // Check if user is logged in
   const [roleBadge, setRoleBadge] = useState("");
@@ -47,6 +47,8 @@ const Header = () => {
           <input
             className="input input-bordered join-item"
             placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <select className="select select-bordered join-item">
             <option disabled value="">

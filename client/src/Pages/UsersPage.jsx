@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useUser } from "../contexts/UserContext";
+import { useOutletContext } from "react-router-dom";
 import Popup from "../components/Popup";
 import UsersTable from "../components/UsersTable";
 
@@ -9,7 +10,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState([]); // State for storing users
   const [filteredUsers, setFilteredUsers] = useState([]); // State for storing filtered users
   const [selectedUsers, setSelectedUsers] = useState([]); // State for storing selected users
-  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const { searchTerm } = useOutletContext(); // Get search term from Layout
   const [toastMessage, setToastMessage] = useState(""); // State for toast message
   const [toastType, setToastType] = useState(""); // State for toast type
   const [loading, setLoading] = useState(true); // Loading state
@@ -47,6 +48,7 @@ const UsersPage = () => {
 
   // Filter users based on search term
   useEffect(() => {
+    // Filter users based on search term
     const filtered = users.filter(
       (user) =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,15 +189,6 @@ const UsersPage = () => {
         <div>Loading...</div> // Replace with a loading spinner or skeleton if needed
       ) : (
         <>
-          {/* Search Bar */}
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input input-bordered w-full mb-4"
-          />
-
           <button
             className="btn btn-error mb-4"
             onClick={deleteSelectedUsers}
