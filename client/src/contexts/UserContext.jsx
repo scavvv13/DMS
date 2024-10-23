@@ -39,7 +39,7 @@ export const UserContextProvider = ({ children }) => {
       if (response.data.success) {
         const user = response.data.user;
         setUser({
-          id: user._id, // Adjust as needed
+          id: user.id, // Adjust as needed
           name: user.name,
           email: user.email,
           role: user.role,

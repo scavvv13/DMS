@@ -1,4 +1,6 @@
 const User = require("../models/UserModel");
+const { deleteDocument } = require("../controllers/documentController");
+const DocumentModel = require("../models/DocumentModel"); // Import deleteDocument function
 
 // Get User Profile Controller
 const getUserProfile = async (req, res) => {
@@ -79,23 +81,41 @@ const deleteUser = async (req, res) => {
 
     const { email } = req.params; // Get email from request parameters
 
-    // Find user by email and delete
+    // Find user by email
     const deletedUser = await User.findOneAndDelete({ email });
 
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Successfully deleted user
-    res
-      .status(200)
-      .json({ success: true, message: "User deleted successfully." });
+    // Find all documents associated with the user
+    const userDocuments = await DocumentModel.find({
+      documentUploader: deletedUser._id,
+    });
+
+    // Delete the documents asynchronously
+    const deletePromises = userDocuments.map(async (doc) => {
+      try {
+        await deleteDocument({ params: { id: doc._id } }, null); // Passing `null` as `res` to prevent multiple response calls
+      } catch (error) {
+        console.error(`Failed to delete document: ${doc._id}`, error);
+      }
+    });
+
+    await Promise.all(deletePromises); // Ensure all delete operations finish
+
+    // Successfully deleted user and their files
+    return res.status(200).json({
+      success: true,
+      message: "User and their documents deleted successfully.",
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: "Server error" });
+    }
   }
 };
-
 // Batch Delete Users Controller
 const batchDeleteUsers = async (req, res) => {
   try {
@@ -106,18 +126,37 @@ const batchDeleteUsers = async (req, res) => {
 
     const { emails } = req.body; // Get emails from request body
 
-    // Delete users by email
-    const result = await User.deleteMany({ email: { $in: emails } });
+    // Find users by email
+    const usersToDelete = await User.find({ email: { $in: emails } });
 
-    // Check if users were deleted
-    if (result.deletedCount === 0) {
+    if (usersToDelete.length === 0) {
       return res.status(404).json({ message: "No users found to delete." });
     }
 
-    // Successfully deleted users
-    res
-      .status(200)
-      .json({ success: true, message: "Selected users deleted successfully." });
+    // For each user, delete their documents and then delete the user
+    for (let user of usersToDelete) {
+      const userDocuments = await DocumentModel.find({
+        documentUploader: user._id,
+      });
+
+      // Delete each document associated with the user without passing `res`
+      for (let doc of userDocuments) {
+        try {
+          await deleteDocument({ params: { id: doc._id } }, null); // Ensure `res` is not passed
+        } catch (err) {
+          console.error(`Failed to delete document ${doc._id}:`, err);
+        }
+      }
+
+      // Delete the user
+      await User.findByIdAndDelete(user._id);
+    }
+
+    // Successfully deleted users and their documents
+    res.status(200).json({
+      success: true,
+      message: "Selected users and their documents deleted successfully.",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
