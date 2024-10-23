@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useUser } from "../contexts/UserContext";
+import { useOutletContext } from "react-router-dom";
 import UploadDocumentModal from "../components/UploadDocumentModal";
 import DocumentMenuModal from "../components/DocumentMenuModal";
 import Popup from "../components/Popup";
@@ -10,6 +11,8 @@ const DocumentsPage = () => {
   const { user } = useUser();
   const [documents, setDocuments] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [filteredDocuments, setFilteredDocuments] = useState([]);
+  const { searchTerm } = useOutletContext(); // Get search term from Layout
   const [shareEmail, setShareEmail] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("");
@@ -41,6 +44,17 @@ const DocumentsPage = () => {
 
     fetchDocuments();
   }, [user]); // Depend on user to refetch when user state changes
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = documents.filter((doc) =>
+        doc.documentName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredDocuments(filtered);
+    } else {
+      setFilteredDocuments(documents); // No search term, show all documents
+    }
+  }, [searchTerm, documents]);
 
   const formatFileSize = (bytes) => {
     const sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -167,8 +181,9 @@ const DocumentsPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
           {loading ? (
             <p>Loading documents...</p>
-          ) : Array.isArray(documents) && documents.length > 0 ? (
-            documents.map((doc) => (
+          ) : Array.isArray(filteredDocuments) &&
+            filteredDocuments.length > 0 ? (
+            filteredDocuments.map((doc) => (
               <div
                 className="card bg-base-300 shadow-xl compact-card"
                 key={doc._id}
