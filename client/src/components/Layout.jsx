@@ -10,6 +10,7 @@ const Layout = () => {
   // Determine which page is active and pass relevant data to the outlet
   const isUsersPage = location.pathname.includes("UsersPage");
   const isDocumentsPage = location.pathname.includes("DocumentsPage");
+  const isMemosPage = location.pathname.includes("MemosPage");
 
   return (
     <div className="h-[520px] flex flex-row m-2 ml-3 mt-3">
@@ -17,7 +18,9 @@ const Layout = () => {
       <div className="flex-1 flex flex-col mr-2">
         <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         <div className="bg-base h-[500px] rounded-md container overflow-y-scroll no-scrollbar pl-2 mt-10">
-          <Outlet context={{ searchTerm, isUsersPage, isDocumentsPage }} />
+          <Outlet
+            context={{ searchTerm, isUsersPage, isDocumentsPage, isMemosPage }}
+          />
         </div>
       </div>
     </div>

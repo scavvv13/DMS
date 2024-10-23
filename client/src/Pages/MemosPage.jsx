@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../utils/axiosInstance"; // Adjust the import based on your axios setup
+import { useOutletContext } from "react-router-dom";
 
 const MemosPage = () => {
   const [memos, setMemos] = useState([]);
@@ -8,6 +9,8 @@ const MemosPage = () => {
   const [newMemo, setNewMemo] = useState({ title: "", content: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMemo, setEditingMemo] = useState(null); // State to hold memo being edited
+  const [filteredMemos, setFilteredMemos] = useState([]);
+  const { searchTerm } = useOutletContext(); // Get search term from Layout
 
   // Ref for the modal
   const modalRef = useRef();
@@ -34,6 +37,17 @@ const MemosPage = () => {
 
     fetchMemos();
   }, []);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = memos.filter((memo) =>
+        memo.MemoTitle.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredMemos(filtered);
+    } else {
+      setFilteredMemos(memos); // No search term, show all documents
+    }
+  }, [searchTerm, memos]);
 
   const handleDelete = async (id) => {
     try {
@@ -122,7 +136,7 @@ const MemosPage = () => {
       {/* Memos list */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {memos.length > 0 ? (
-          memos.map((memo) => (
+          filteredMemos.map((memo) => (
             <div
               key={memo._id} // Use unique identifier as key
               className="card bg-base-300 shadow-lg rounded-lg p-1  relative hover:shadow-xl transition-shadow"
