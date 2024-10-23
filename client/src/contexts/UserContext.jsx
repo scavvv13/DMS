@@ -92,9 +92,20 @@ export const UserContextProvider = ({ children }) => {
     setError(null); // Clear any errors on logout
   };
 
+  const timeout = async () => {
+    try {
+      // Call the backend logout API
+      await axiosInstance.post("/logout"); // Adjust the URL as needed
+
+      // Remove token from local storage
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setError("Logout failed. Please try again."); // Set error state if logout fails
+    }
+  };
   return (
     <UserContext.Provider
-      value={{ user, loading, error, login, logout, fetchUserData }}
+      value={{ user, loading, error, login, logout, timeout, fetchUserData }}
     >
       {children}
     </UserContext.Provider>

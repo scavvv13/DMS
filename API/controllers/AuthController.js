@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const bucket = require("../config/firebase");
+const { logAttendance } = require("./AttendanceController");
 
 // Registration Controller
 const register = async (req, res) => {
@@ -132,6 +133,9 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
     );
+
+    // Log the user's attendance (login event)
+    await logAttendance(user._id); // No need to pass "login" action as it's default
 
     // Return the token and user role
     res.json({

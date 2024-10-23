@@ -14,16 +14,27 @@ import axiosInstance from "../utils/axiosInstance"; // Import your axios instanc
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]); // Ensure notifications is an array
-  const { logout, user } = useUser();
+  const { logout, timeout, user } = useUser();
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/LoginPage");
+  const handleTimeOut = async () => {
+    try {
+      // Log the logout event by calling the logout API and pass the user ID in the request
+      await axiosInstance.patch(`/logLogout`, { userId: user.id }); // Send only the user ID
+    } catch (error) {
+      console.error("Failed to log logout:", error);
+      // Optionally show an error notification or message here
+    }
+  };
+
+  const handleLogout = async () => {
+    await handleTimeOut(); // Log the logout event first
+    logout(); // Perform the logout action
+    navigate("/LoginPage"); // Redirect to the login page
   };
 
   // Fetch notifications from the backend using axiosInstance
@@ -90,7 +101,7 @@ const Sidebar = () => {
 
         {/* Notifications Section */}
         <div className="mt-4">
-          <h2 className="font-semibold text-lg mb-2">Notifications</h2>
+          <h2 className="font-semibold text-lg mb-2">Recent</h2>
           <div className="bg-base-200 rounded-md p-3 shadow-inner">
             {notifications.length === 0 ? (
               <p className="text-sm">No new notifications</p>
