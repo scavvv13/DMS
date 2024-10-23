@@ -1,28 +1,52 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Use Link and useNavigate for routing
-import { useUser } from "../contexts/UserContext"; // Import user context
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 import {
   HiUsers,
   HiHome,
   HiDocument,
   HiClipboard,
   HiCog,
-} from "react-icons/hi"; // Import icons from react-icons
-import miaa from "../assets/miaa.png"; // Adjust the path if needed
+} from "react-icons/hi";
+import miaa from "../assets/miaa.png";
+import axiosInstance from "../utils/axiosInstance"; // Import your axios instance
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout, user } = useUser(); // Get logout function and user from context
-  const navigate = useNavigate(); // Hook for navigation
+  const [notifications, setNotifications] = useState([]); // Ensure notifications is an array
+  const { logout, user } = useUser();
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
   const handleLogout = () => {
-    logout(); // Call the logout function
-    navigate("/LoginPage"); // Redirect to login page after logout
+    logout();
+    navigate("/LoginPage");
   };
+
+  // Fetch notifications from the backend using axiosInstance
+  const fetchNotifications = async () => {
+    try {
+      const response = await axiosInstance.get("/notifications"); // Adjust the endpoint as necessary
+      if (Array.isArray(response.data.notifications)) {
+        setNotifications(response.data.notifications);
+      } else {
+        console.error("Unexpected response format:", response.data);
+        setNotifications([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+      setNotifications([]);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications(); // Fetch notifications when user is logged in
+    }
+  }, [user]);
 
   return (
     <>
@@ -64,38 +88,89 @@ const Sidebar = () => {
           </a>
         </div>
 
-        {/* User Profile */}
         {/* Notifications Section */}
         <div className="mt-4">
           <h2 className="font-semibold text-lg mb-2">Notifications</h2>
           <div className="bg-base-200 rounded-md p-3 shadow-inner">
-            <p className="text-sm">New user registered!</p>
-            <p className="text-sm">Document updated successfully!</p>
+            {notifications.length === 0 ? (
+              <p className="text-sm">No new notifications</p>
+            ) : (
+              <>
+                <p className="text-sm">
+                  {notifications[0].title} {notifications[0].content}
+                </p>
+                {notifications.length > 1 && (
+                  <p
+                    className="text-primary cursor-pointer"
+                    onClick={() =>
+                      document.getElementById("my_modal_2").showModal()
+                    }
+                  >
+                    View all notifications
+                  </p>
+                )}
+              </>
+            )}
           </div>
         </div>
 
+        {/* Notifications Modal */}
+        <dialog id="my_modal_2" className="modal">
+          <div className="modal-box max-w-4xl max-h-[80vh] overflow-y-auto no-scrollbar">
+            <h3 className="font-bold text-lg mb-4">All Notifications</h3>
+            <div className="overflow-x-auto">
+              <table className="table-auto w-full text-left">
+                <thead>
+                  <tr className="bg-base-200">
+                    <th className="px-4 py-2">Title</th>
+                    <th className="px-4 py-2">Content</th>
+                    <th className="px-4 py-2">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notifications.map((notification, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="px-4 py-2">{notification.title}</td>
+                      <td className="px-4 py-2">{notification.content}</td>
+                      <td className="px-4 py-2">
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="modal-action justify-end">
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => document.getElementById("my_modal_2").close()}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </dialog>
+
         {/* Nav Items */}
         <nav className="flex flex-col items-center justify-center flex-grow">
-          {user &&
-            user.role === "admin" && ( // Ensure user exists and has admin role
-              <>
-                <Link
-                  to="/admin/DashboardPage"
-                  className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
-                >
-                  <HiHome className="mr-2" />
-                  Dashboard
-                </Link>
-                <Link
-                  to="/admin/UsersPage"
-                  className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
-                >
-                  <HiUsers className="mr-2" />
-                  Users
-                </Link>
-              </>
-            )}
-
+          {user && user.role === "admin" && (
+            <>
+              <Link
+                to="/admin/DashboardPage"
+                className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
+              >
+                <HiHome className="mr-2" />
+                Dashboard
+              </Link>
+              <Link
+                to="/admin/UsersPage"
+                className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
+              >
+                <HiUsers className="mr-2" />
+                Users
+              </Link>
+            </>
+          )}
           <Link
             to="/admin/DocumentsPage"
             className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
@@ -122,7 +197,7 @@ const Sidebar = () => {
         {/* Logout Button */}
         <div className="mb-5">
           <button
-            className="py-2 rounded-md btn btn-outline btn-primary w-25 h-3 hover:bg-primary hover:text-white transition duration-200"
+            className="py-2 rounded-md btn btn-outline btn-primary w-full hover:bg-primary hover:text-white transition duration-200"
             onClick={handleLogout}
           >
             Logout

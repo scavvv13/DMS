@@ -25,25 +25,27 @@ export const UserContextProvider = ({ children }) => {
   }, []);
 
   const fetchUserData = async () => {
-    const token = localStorage.getItem("token"); // Retrieve token
+    const token = localStorage.getItem("token");
 
     if (!token) {
-      console.warn("No token found,. User data cannot be fetched.");
-      return null; // Return early if there's no token
+      console.warn("No token found. User data cannot be fetched.");
+      setUser(null); // Clear user if no token
+      return null;
     }
 
     try {
       const response = await axiosInstance.get("/user/profile");
+      console.log("User Profile Response:", response.data); // Debugging line
       if (response.data.success) {
-        const userData = response.data.user;
+        const user = response.data.user;
         setUser({
-          id: userData.id, // Corrected from _id to id
-          name: userData.name,
-          email: userData.email,
-          role: userData.role,
-          profilePictureUrl: userData.profilePicture, // Match the backend naming
+          id: user._id, // Adjust as needed
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          profilePictureUrl: user.profilePicture,
         });
-        return userData; // Return user data
+        return user; // Ensure the correct user data is returned
       } else {
         console.error("Failed to fetch user profile:", response.data);
         setError(response.data.message || "Failed to fetch user data.");
@@ -52,7 +54,7 @@ export const UserContextProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to fetch user profile", err);
       setUser(null);
-      localStorage.removeItem("token"); // Clear invalid token
+      localStorage.removeItem("token");
       setError("Session expired. Please log in again.");
       return null;
     }

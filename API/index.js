@@ -8,6 +8,7 @@ const authRoutes = require("./routes/AuthRoutes");
 const userRoutes = require("./routes/UserRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const memoRoutes = require("./routes/MemoRoutes");
+const NotificationRoutes = require("./routes/NotificationRoutes");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/", documentRoutes);
 app.use("/api/", memoRoutes);
+app.use("/api/", NotificationRoutes);
 
 // Database connection
 mongoose

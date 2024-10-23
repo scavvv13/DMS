@@ -20,7 +20,6 @@ const DocumentsPage = () => {
   const [loading, setLoading] = useState(false); // Loading state for documents
 
   useEffect(() => {
-    console.log("User token:", user?.token);
     const fetchDocuments = async () => {
       if (!user) {
         setToastMessage("You need to be logged in to view documents.");
@@ -32,7 +31,6 @@ const DocumentsPage = () => {
       try {
         const response = await axiosInstance.get("/documents");
         setDocuments(response.data.documents);
-        console.log("User token:", user?.token);
       } catch (error) {
         console.error("Error fetching documents:", error);
         setToastMessage("Failed to fetch documents. Please try again.");
@@ -43,6 +41,7 @@ const DocumentsPage = () => {
     };
 
     fetchDocuments();
+    console.log(user.name);
   }, [user]); // Depend on user to refetch when user state changes
 
   useEffect(() => {
@@ -95,7 +94,10 @@ const DocumentsPage = () => {
     try {
       const response = await axiosInstance.post(
         `/documents/${documentId}/share`,
-        { email: shareEmail }
+        {
+          email: shareEmail,
+          name: user.name,
+        }
       );
       setToastMessage(response.data.message);
       setToastType("success");

@@ -3,45 +3,48 @@ const bucket = require("../config/firebase");
 const UserModel = require("../models/UserModel");
 const { v4: uuidv4 } = require("uuid");
 const { getSignedUrl } = require("@google-cloud/storage");
+const { createNotification } = require("../utils/NotificationUtil");
 
 // Upload Document
 exports.postDocument = async (req, res) => {
   try {
     const { documentName, documentType, documentUploader, haveAccess } =
       req.body;
-    const file = req.file; // Assuming you're using multer to handle file uploads
+    const file = req.file;
 
     if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Upload to Firebase Cloud Storage
     const blob = bucket.file(`${uuidv4()}-${file.originalname}`);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-    });
+    const blobStream = blob.createWriteStream({ resumable: false });
 
     blobStream.on("error", (err) => {
       return res.status(500).json({ message: "Upload failed", error: err });
     });
 
     blobStream.on("finish", async () => {
-      // Get file path (not a public URL, but the reference path in Firebase Storage)
       const documentPath = blob.name;
       const documentSize = file.size;
 
-      // Save document details in MongoDB
       const document = new DocumentModel({
-        documentImageURL: documentPath, // Save the Firebase path, not the public URL
+        documentImageURL: documentPath,
         documentName,
         documentSize,
         documentType,
         documentPath,
         documentUploader, // Ensure this is a valid ObjectId
-        haveAccess: haveAccess || [], // Set to empty array if not provided
+        haveAccess: haveAccess || [],
       });
 
       await document.save();
+
+      // Create notification for document upload
+      await createNotification(
+        documentUploader,
+        "New Document Uploaded",
+        `${documentName} has been uploaded.`
+      );
 
       res
         .status(201)
@@ -97,12 +100,16 @@ exports.deleteDocument = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // Delete file from Firebase Storage
     const file = bucket.file(document.documentPath);
     await file.delete();
-
-    // Remove document from MongoDB
     await DocumentModel.findByIdAndDelete(id);
+
+    // Create notification for document deletion
+    await createNotification(
+      document.documentUploader,
+      "Document Deleted",
+      `${document.documentName} has been deleted.`
+    );
 
     res.status(200).json({ message: "Document deleted successfully" });
   } catch (err) {
@@ -113,7 +120,7 @@ exports.deleteDocument = async (req, res) => {
 // Share Document
 exports.shareDocument = async (req, res) => {
   try {
-    const { email } = req.body; // Get email from request body
+    const { email, name } = req.body;
     const { id } = req.params;
 
     const document = await DocumentModel.findById(id);
@@ -121,20 +128,28 @@ exports.shareDocument = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // Find user by email
     const user = await UserModel.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if user already has access
     if (document.haveAccess.includes(user._id)) {
       return res.status(400).json({ message: "User already has access" });
     }
 
-    // Add user to haveAccess array
+    // Grant access to the user
     document.haveAccess.push(user._id);
     await document.save();
+
+    // Check if req.user.name is defined
+    const username = name || "Unknown User"; // Fallback if name is undefined
+
+    // Create notification for document sharing
+    await createNotification(
+      user._id,
+      "Document Shared",
+      `You have been granted access to "${document.documentName}" by ${username}.`
+    );
 
     res.status(200).json({ message: "Document shared successfully" });
   } catch (err) {
@@ -142,10 +157,9 @@ exports.shareDocument = async (req, res) => {
   }
 };
 
-// Remove Access
 exports.removeAccess = async (req, res) => {
   try {
-    const { email } = req.body; // Get email from request body
+    const { email } = req.body;
     const { id } = req.params;
 
     const document = await DocumentModel.findById(id);
@@ -153,22 +167,26 @@ exports.removeAccess = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // Find user by email
     const user = await UserModel.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if user has access
     if (!document.haveAccess.includes(user._id)) {
       return res.status(400).json({ message: "User does not have access" });
     }
 
-    // Remove user from haveAccess array
     document.haveAccess = document.haveAccess.filter(
       (userId) => !userId.equals(user._id)
     );
     await document.save();
+
+    // Create notification for access removal
+    await createNotification(
+      user._id,
+      "Access Removed",
+      `Your access to ${document.documentName} has been revoked.`
+    );
 
     res.status(200).json({ message: "Access removed successfully" });
   } catch (err) {
