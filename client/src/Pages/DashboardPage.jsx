@@ -156,14 +156,11 @@ const DashboardPage = () => {
         </div>
 
         {/* Employee Attendance Pie Chart */}
-        <div className="bg-base-200 p-4 rounded-lg shadow-md h-[320px]">
-          <h2 className="text-lg font-semibold mb-3">
-            Employee Attendance Performance
-          </h2>
-          <div className="relative h-[240px]">
-            <AttendancePie date={currentDate} />
-          </div>
-        </div>
+
+        <AttendancePie
+          date={currentDate}
+          className="bg-base-200 p-4 rounded-lg shadow-md h-[320px]"
+        />
       </div>
 
       {/* Employees with Most Lates */}

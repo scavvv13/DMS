@@ -68,7 +68,7 @@ const AttendanceTable = () => {
           <tbody>
             {filteredRecords.length > 0 ? (
               filteredRecords.map((record, index) => (
-                <tr key={index} className="hover:bg-gray-50">
+                <tr key={index} className="hover:bg-secondary">
                   <td className="border border-gray-300 px-4 py-2">
                     {record.name}
                   </td>

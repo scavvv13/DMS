@@ -196,13 +196,6 @@ const Sidebar = () => {
             <HiClipboard className="mr-2" />
             Memos
           </Link>
-          <Link
-            to="/admin/SettingsPage"
-            className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
-          >
-            <HiCog className="mr-2" />
-            Settings
-          </Link>
         </nav>
 
         {/* Logout Button */}
