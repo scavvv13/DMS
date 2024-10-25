@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { Link } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
+import AttendanceTable from "../components/AttendanceTable";
+import AttendancePie from "../components/AttendancePie";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -29,6 +31,7 @@ const DashboardPage = () => {
   const [error, setError] = useState("");
   const [showLates, setShowLates] = useState(false);
   const [showPerformance, setShowPerformance] = useState(false);
+  const currentDate = new Date().toISOString().split("T")[0]; // Format date as 'YYYY-MM-DD'
 
   // Fetch document count on mount
   useEffect(() => {
@@ -100,17 +103,6 @@ const DashboardPage = () => {
   };
 
   // Data for the Employee Attendance Pie chart
-  const attendancePieData = {
-    labels: ["On Time", "Late", "Absent"],
-    datasets: [
-      {
-        label: "Attendance Performance",
-        data: [70, 20, 10], // Example data
-        backgroundColor: ["#4CAF50", "#FFC107", "#F44336"], // Colors for On Time, Late, and Absent
-        hoverBackgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
-      },
-    ],
-  };
 
   return (
     <div className="p-4 space-y-6">
@@ -169,24 +161,7 @@ const DashboardPage = () => {
             Employee Attendance Performance
           </h2>
           <div className="relative h-[240px]">
-            <Pie
-              data={attendancePieData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: "bottom", // Keep the legend at the bottom
-                    labels: {
-                      boxWidth: 10, // Smaller legend box
-                      font: {
-                        size: 10, // Smaller font size for legend
-                      },
-                    },
-                  },
-                },
-              }}
-            />
+            <AttendancePie date={currentDate} />
           </div>
         </div>
       </div>
@@ -338,6 +313,7 @@ const DashboardPage = () => {
           </div>
         </Link>
       </div>
+      <AttendanceTable />
     </div>
   );
 };
