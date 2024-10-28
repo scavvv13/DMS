@@ -46,8 +46,8 @@ const LoginPage = () => {
       if (loggedInUser && loggedInUser.role) {
         navigate(
           loggedInUser.role === "admin"
-            ? "/admin/UsersPage"
-            : "/user/DashboardPage"
+            ? "/admin/DashboardPage "
+            : "/user/UserDashPage"
         );
       } else {
         console.error("User role not found.");

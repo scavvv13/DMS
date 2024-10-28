@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../utils/axiosInstance"; // Adjust the import based on your axios setup
 import { useOutletContext } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 const MemosPage = () => {
   const [memos, setMemos] = useState([]);
@@ -11,6 +12,7 @@ const MemosPage = () => {
   const [editingMemo, setEditingMemo] = useState(null); // State to hold memo being edited
   const [filteredMemos, setFilteredMemos] = useState([]);
   const { searchTerm } = useOutletContext(); // Get search term from Layout
+  const { user } = useUser();
 
   // Ref for the modal
   const modalRef = useRef();
@@ -129,9 +131,11 @@ const MemosPage = () => {
   return (
     <div className="p-6">
       {/* Button to add a new memo */}
-      <button onClick={handleOpenModal} className="btn btn-base-300 mb-4">
-        Add Memo
-      </button>
+      {user === "admin" && (
+        <button onClick={handleOpenModal} className="btn btn-base-300 mb-4">
+          Add Memo
+        </button>
+      )}
 
       {/* Memos list */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -146,47 +150,50 @@ const MemosPage = () => {
                   {memo.MemoTitle}
                 </h2>
                 <p className="text-sm text-gray-600 mb-2">{memo.MemoContent}</p>
-                <div className="absolute top-2 right-2">
-                  <button
-                    className="w-8 h-8 p-1 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-                    tabIndex={0}
-                    onClick={() => handleEdit(memo)} // Open edit modal directly
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
+                {user.role === "admin" && (
+                  <div className="absolute top-2 right-2">
+                    <button
+                      className="w-8 h-8 p-1 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      tabIndex={0}
+                      onClick={() => handleEdit(memo)} // Open edit modal directly
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    className="w-8 h-8 p-1 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-                    onClick={() => handleDelete(memo._id)} // Use _id for deletion
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </button>
+
+                    <button
+                      className="w-8 h-8 p-1 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      onClick={() => handleDelete(memo._id)} // Use _id for deletion
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))
