@@ -1,9 +1,10 @@
 const DocumentModel = require("../models/DocumentModel");
 const bucket = require("../config/firebase");
-const UserModel = require("../models/UserModel");
 const { v4: uuidv4 } = require("uuid");
-const { getSignedUrl } = require("@google-cloud/storage");
 const { createNotification } = require("../utils/NotificationUtil");
+const fs = require("fs");
+const path = require("path");
+const fetch = require("node-fetch");
 
 // Upload Document
 exports.postDocument = async (req, res) => {
@@ -20,7 +21,7 @@ exports.postDocument = async (req, res) => {
     const blobStream = blob.createWriteStream({ resumable: false });
 
     blobStream.on("error", (err) => {
-      return res.status(500).json({ message: "Upload failed", error: err });
+      res.status(500).json({ message: "Upload failed", error: err });
     });
 
     blobStream.on("finish", async () => {
@@ -33,13 +34,12 @@ exports.postDocument = async (req, res) => {
         documentSize,
         documentType,
         documentPath,
-        documentUploader, // Ensure this is a valid ObjectId
+        documentUploader,
         haveAccess: haveAccess || [],
       });
 
       await document.save();
 
-      // Create notification for document upload
       await createNotification(
         documentUploader,
         "New Document Uploaded",
@@ -57,35 +57,71 @@ exports.postDocument = async (req, res) => {
   }
 };
 
-// Get Documents (with Signed URLs)
+// Download Document
+exports.downloadDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const document = await DocumentModel.findById(id);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    const file = bucket.file(document.documentPath);
+
+    const [signedUrl] = await file.getSignedUrl({
+      version: "v4",
+      action: "read",
+      expires: Date.now() + 15 * 60 * 1000,
+    });
+
+    const response = await fetch(signedUrl);
+    if (!response.ok) {
+      return res
+        .status(500)
+        .json({ message: "Error downloading file from Firebase" });
+    }
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${document.documentName}"`
+    );
+    res.setHeader("Content-Type", document.documentType);
+
+    response.body.pipe(res);
+  } catch (err) {
+    console.error("Error in downloadDocument:", err);
+    res.status(500).json({ message: "Error downloading document", error: err });
+  }
+};
+
 // Get Documents (with Signed URLs)
 exports.getDocuments = async (req, res) => {
   try {
-    const userId = req.user.id; // Get the user ID from the request
+    const userId = req.user.id;
 
-    // Find documents uploaded by the user or shared with them
     const documents = await DocumentModel.find({
-      $or: [
-        { documentUploader: userId }, // Documents uploaded by the user
-        { haveAccess: userId }, // Documents shared with the user
-      ],
+      $or: [{ documentUploader: userId }, { haveAccess: userId }],
     })
       .populate("documentUploader", "name email")
       .populate("haveAccess", "name email");
 
-    // Generate signed URLs for secure access
-    for (let doc of documents) {
-      const file = bucket.file(doc.documentPath); // Use the documentPath stored in MongoDB
-      const [signedUrl] = await file.getSignedUrl({
-        version: "v4",
-        action: "read",
-        expires: Date.now() + 15 * 60 * 1000, // Signed URL valid for 15 minutes
-      });
-      doc.documentImageURL = signedUrl; // Replace the documentImageURL with the signed URL
-    }
+    // Generate signed URLs concurrently using Promise.all
+    const documentsWithSignedUrls = await Promise.all(
+      documents.map(async (doc) => {
+        const file = bucket.file(doc.documentPath);
+        const [signedUrl] = await file.getSignedUrl({
+          version: "v4",
+          action: "read",
+          expires: Date.now() + 15 * 60 * 1000,
+        });
+        return { ...doc.toObject(), documentImageURL: signedUrl };
+      })
+    );
 
-    res.status(200).json({ documents });
+    res.status(200).json({ documents: documentsWithSignedUrls });
   } catch (err) {
+    console.error("Error in getDocuments:", err);
     res.status(500).json({ message: "Error retrieving documents", error: err });
   }
 };

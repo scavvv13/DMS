@@ -73,6 +73,31 @@ const DocumentsPage = () => {
     }
   };
 
+  const handleDownload = async (documentId) => {
+    if (!user) return; // Ensure user is logged in
+    try {
+      const response = await axiosInstance.get(
+        `/documents/${documentId}/download`,
+        {
+          responseType: "blob",
+        }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "document.pdf"); // Change name if needed
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setToastMessage("Download started.");
+      setToastType("success");
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      setToastMessage("Failed to download document.");
+      setToastType("error");
+    }
+  };
+
   const handleDelete = async (documentId) => {
     if (!user) return; // Ensure user is logged in
     try {
@@ -204,28 +229,49 @@ const DocumentsPage = () => {
                     <div className="badge badge-secondary badge-outline ml-1">
                       {doc.documentType}
                     </div>
-                    <button
-                      className="btn btn-sm btn-ghost p-1"
-                      onClick={() => {
-                        setSelectedDocument(doc);
-                        setIsMenuModalOpen(true); // Open modal using state
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-4 h-4"
+                    <div>
+                      <button
+                        className="btn btn-sm btn-ghost p-1"
+                        onClick={() => handleDownload(doc._id)}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-ghost p-1"
+                        onClick={() => {
+                          setSelectedDocument(doc);
+                          setIsMenuModalOpen(true); // Open modal using state
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -8,6 +8,7 @@ const {
   shareDocument,
   countDocuments,
   countSharedDocuments,
+  downloadDocument,
   removeAccess, // Import the deleteDocument controller
 } = require("../controllers/documentController");
 const router = express.Router();
@@ -47,6 +48,12 @@ router.post(
 );
 
 router.get("/countDocuments", authMiddleware(["admin"]), countDocuments);
+
+router.get(
+  "/documents/:id/download",
+  authMiddleware(["admin", "user"]),
+  downloadDocument
+);
 
 router.get(
   "/countSharedDocuments",

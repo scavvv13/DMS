@@ -14,8 +14,9 @@ import axiosInstance from "../utils/axiosInstance"; // Import your axios instanc
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]); // Ensure notifications is an array
-  const { logout, timeout, user } = useUser();
+  const { logout, timeout } = useUser();
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
@@ -197,7 +198,7 @@ const Sidebar = () => {
             Memos
           </Link>
 
-          {user.role === "user" && (
+          {user && !user.role === "admin" && (
             <Link
               to="/user/UserDashPage"
               className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"
