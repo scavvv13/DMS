@@ -18,6 +18,7 @@ const DocumentsPage = () => {
   const [toastType, setToastType] = useState("");
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state for documents
+  const encodedFilePath = encodeURIComponent("uploads/documents/sample.pdf");
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -73,22 +74,23 @@ const DocumentsPage = () => {
     }
   };
 
-  const handleDownload = async (documentId) => {
+  const handleDownload = async (documentPath) => {
     if (!user) return; // Ensure user is logged in
     try {
+      const encodedFilePath = encodeURIComponent(documentPath); // Encode the document path
       const response = await axiosInstance.get(
-        `/documents/${documentId}/download`,
-        {
-          responseType: "blob",
-        }
+        `/documents/${encodedFilePath}/download`
       );
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const downloadUrl = response.data.downloadUrl; // Extract the signed URL from the response
+
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "document.pdf"); // Change name if needed
+      link.href = downloadUrl; // Use the signed URL
+      link.setAttribute("download", "document.png"); // Change name if needed
       document.body.appendChild(link);
       link.click();
       link.remove();
+
       setToastMessage("Download started.");
       setToastType("success");
     } catch (error) {
@@ -232,7 +234,7 @@ const DocumentsPage = () => {
                     <div>
                       <button
                         className="btn btn-sm btn-ghost p-1"
-                        onClick={() => handleDownload(doc._id)}
+                        onClick={() => handleDownload(doc.documentPath)}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

@@ -50,7 +50,7 @@ router.post(
 router.get("/countDocuments", authMiddleware(["admin"]), countDocuments);
 
 router.get(
-  "/documents/:id/download",
+  "/documents/:fileName/download",
   authMiddleware(["admin", "user"]),
   downloadDocument
 );

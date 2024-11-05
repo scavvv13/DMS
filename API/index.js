@@ -14,7 +14,13 @@ const AttendanceRoutes = require("./routes/AttendanceRoutes");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Change this to your frontend's URL
+    methods: ["GET", "POST", "OPTIONS", "PATCH"], // Allow necessary methods
+    credentials: true, // If you need to pass cookies or authorization headers
+  })
+);
 app.use(helmet());
 app.use(express.json());
 

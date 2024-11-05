@@ -60,35 +60,31 @@ exports.postDocument = async (req, res) => {
 // Download Document
 exports.downloadDocument = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { fileName } = req.params;
 
-    const document = await DocumentModel.findById(id);
-    if (!document) {
-      return res.status(404).json({ message: "Document not found" });
+    if (!fileName) {
+      return res.status(400).json({ message: "File name not provided" });
     }
 
-    const file = bucket.file(document.documentPath);
+    console.log("Requested file name:", fileName);
 
+    // Reference the file in Firebase Storage
+    const file = bucket.file(fileName);
+
+    // Get signed URL for the file with Content-Disposition header to force download
     const [signedUrl] = await file.getSignedUrl({
       version: "v4",
       action: "read",
-      expires: Date.now() + 15 * 60 * 1000,
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+      responseDisposition: `attachment; filename="${fileName}"`, // Force download
+      // Remove contentType if not necessary to avoid header issues
     });
 
-    const response = await fetch(signedUrl);
-    if (!response.ok) {
-      return res
-        .status(500)
-        .json({ message: "Error downloading file from Firebase" });
-    }
-
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${document.documentName}"`
-    );
-    res.setHeader("Content-Type", document.documentType);
-
-    response.body.pipe(res);
+    // Return the signed URL in the response
+    res.status(200).json({
+      message: "File available for download",
+      downloadUrl: signedUrl,
+    });
   } catch (err) {
     console.error("Error in downloadDocument:", err);
     res.status(500).json({ message: "Error downloading document", error: err });
