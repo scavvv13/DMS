@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axiosInstance from "../utils/axiosInstance"; // Adjust the import based on your axios setup
+import axiosInstance from "../utils/axiosInstance";
 import { useOutletContext } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 
@@ -9,28 +9,24 @@ const MemosPage = () => {
   const [error, setError] = useState("");
   const [newMemo, setNewMemo] = useState({ title: "", content: "" });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMemo, setEditingMemo] = useState(null); // State to hold memo being edited
+  const [editingMemo, setEditingMemo] = useState(null);
   const [filteredMemos, setFilteredMemos] = useState([]);
-  const { searchTerm } = useOutletContext(); // Get search term from Layout
+  const { searchTerm } = useOutletContext();
   const { user } = useUser();
 
-  // Ref for the modal
   const modalRef = useRef();
 
   useEffect(() => {
     const fetchMemos = async () => {
       try {
         const response = await axiosInstance.get("/memos");
-        console.log(response.data); // Log the full response to see the structure
-        const { memos } = response.data; // Adjust based on the actual structure returned
-
+        const { memos } = response.data;
         if (Array.isArray(memos)) {
-          setMemos(memos); // Set memos only if response data is an array
+          setMemos(memos);
         } else {
           throw new Error("Response is not an array");
         }
       } catch (err) {
-        console.error(err);
         setError("Failed to fetch memos.");
       } finally {
         setLoading(false);
@@ -47,14 +43,14 @@ const MemosPage = () => {
       );
       setFilteredMemos(filtered);
     } else {
-      setFilteredMemos(memos); // No search term, show all documents
+      setFilteredMemos(memos);
     }
   }, [searchTerm, memos]);
 
   const handleDelete = async (id) => {
     try {
       await axiosInstance.delete(`/memo/${id}`);
-      setMemos((prevMemos) => prevMemos.filter((memo) => memo._id !== id)); // Use _id for comparison
+      setMemos((prevMemos) => prevMemos.filter((memo) => memo._id !== id));
     } catch (err) {
       setError("Failed to delete memo.");
     }
@@ -74,17 +70,16 @@ const MemosPage = () => {
 
     try {
       const response = await axiosInstance.post("/memos", newMemo);
-      setMemos((prev) => [...prev, response.data.memo]); // Adjust if needed based on response structure
-      setNewMemo({ title: "", content: "" }); // Reset the form
-      setIsModalOpen(false); // Close modal after adding memo
+      setMemos((prev) => [response.data.memo, ...prev]);
+      setNewMemo({ title: "", content: "" });
+      setIsModalOpen(false);
     } catch (err) {
-      console.error(err);
       setError("Failed to add memo.");
     }
   };
 
   const handleOpenModal = () => {
-    setNewMemo({ title: "", content: "" }); // Reset memo data
+    setNewMemo({ title: "", content: "" });
     setIsModalOpen(true);
   };
 
@@ -107,20 +102,18 @@ const MemosPage = () => {
 
     try {
       const response = await axiosInstance.put(
-        `/memo/${editingMemo._id}`, // Use _id for updating
+        `/memo/${editingMemo._id}`,
         newMemo
       );
-      setMemos(
-        (prev) =>
-          prev.map((memo) =>
-            memo._id === editingMemo._id ? response.data.memo : memo
-          ) // Use _id for comparison
-      ); // Update the edited memo in the state
+      setMemos((prev) =>
+        prev.map((memo) =>
+          memo._id === editingMemo._id ? response.data.memo : memo
+        )
+      );
       setNewMemo({ title: "", content: "" });
-      setIsModalOpen(false); // Close modal after updating memo
+      setIsModalOpen(false);
       setEditingMemo(null);
     } catch (err) {
-      console.error(err);
       setError("Failed to update memo.");
     }
   };
@@ -130,79 +123,129 @@ const MemosPage = () => {
 
   return (
     <div className="p-6">
-      {/* Button to add a new memo */}
-      {user === "admin" && (
+      {user.role === "admin" && (
         <button onClick={handleOpenModal} className="btn btn-base-300 mb-4">
           Add Memo
         </button>
       )}
 
-      {/* Memos list */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {memos.length > 0 ? (
-          filteredMemos.map((memo) => (
-            <div
-              key={memo._id} // Use unique identifier as key
-              className="card bg-base-300 shadow-lg rounded-lg p-1  relative hover:shadow-xl transition-shadow"
-            >
-              <div className="card-body h-52 overflow-hidden">
-                <h2 className="card-title text-lg font-semibold">
-                  {memo.MemoTitle}
-                </h2>
-                <p className="text-sm text-gray-600 mb-2">{memo.MemoContent}</p>
-                {user.role === "admin" && (
-                  <div className="absolute top-2 right-2">
-                    <button
-                      className="w-8 h-8 p-1 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-                      tabIndex={0}
-                      onClick={() => handleEdit(memo)} // Open edit modal directly
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
+      <div className="flex flex-col items-center">
+        {filteredMemos.length > 0 ? (
+          <>
+            <div className="w-full md:w-1/2 lg:w-full mb-6 overflow-scroll no-scrollbar  ">
+              <div className="card bg-base-300 shadow-lg rounded-lg p-1 relative hover:shadow-xl transition-shadow">
+                <div className="card-body h-72">
+                  <h2 className="card-title text-xl font-semibold">
+                    {filteredMemos[0].MemoTitle}
+                  </h2>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {filteredMemos[0].MemoContent}
+                  </p>
+                  {user.role === "admin" && (
+                    <div className="absolute top-2 right-2 flex space-x-2">
+                      <button onClick={() => handleEdit(filteredMemos[0])}>
+                        {/* Edit Icon */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className="w-5 h-5 text-blue-500 hover:text-blue-700"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15.232 4.232a3 3 0 014.243 4.243L7.5 20.5l-4 1 1-4L15.232 4.232z"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(filteredMemos[0]._id)}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                    </button>
-
-                    <button
-                      className="w-8 h-8 p-1 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-                      onClick={() => handleDelete(memo._id)} // Use _id for deletion
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                        {/* Delete Icon */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          ))
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+              {filteredMemos.slice(1).map((memo) => (
+                <div
+                  key={memo._id}
+                  className="card bg-base-200 shadow rounded-lg p-2 h-48 relative hover:shadow-md transition-shadow"
+                >
+                  <div className="card-body overflow-hidden">
+                    <h2 className="card-title text-lg font-medium">
+                      {memo.MemoTitle}
+                    </h2>
+                    <p className="text-xs text-gray-600">{memo.MemoContent}</p>
+                    {user.role === "admin" && (
+                      <div className="absolute top-2 right-2 flex space-x-2">
+                        <button onClick={() => handleEdit(filteredMemos[0])}>
+                          {/* Edit Icon */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="w-5 h-5 text-blue-500 hover:text-blue-700"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15.232 4.232a3 3 0 014.243 4.243L7.5 20.5l-4 1 1-4L15.232 4.232z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(filteredMemos[0]._id)}
+                        >
+                          {/* Delete Icon */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="size-6"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <p>No memos available.</p>
         )}
       </div>
 
-      {/* Modal for adding/editing memos */}
       {isModalOpen && (
         <dialog ref={modalRef} className="modal modal-open no-scrollbar">
           <form
@@ -213,13 +256,11 @@ const MemosPage = () => {
             <h2 className="font-bold text-lg mb-4">
               {editingMemo ? "Edit Memo" : "Add Memo"}
             </h2>
-            <div className="mb-4 no-scrollbar">
-              <label className="block text-sm font-bold mb-2" htmlFor="title">
-                Memo Title
-              </label>
+            <div className="mb-4">
+              <label htmlFor="title">Memo Title</label>
               <input
                 type="text"
-                id="title" // Updated to use id
+                id="title"
                 name="title"
                 value={newMemo.title}
                 onChange={handleInputChange}
@@ -229,11 +270,9 @@ const MemosPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-bold mb-2" htmlFor="content">
-                Memo Content
-              </label>
+              <label htmlFor="content">Memo Content</label>
               <textarea
-                id="content" // Updated to use id
+                id="content"
                 name="content"
                 value={newMemo.content}
                 onChange={handleInputChange}
