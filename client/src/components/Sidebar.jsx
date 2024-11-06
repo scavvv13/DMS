@@ -198,7 +198,7 @@ const Sidebar = () => {
             Memos
           </Link>
 
-          {user && !user.role === "admin" && (
+          {user && user.role === "user" && (
             <Link
               to="/user/UserDashPage"
               className="flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-transparent hover:text-primary hover:border hover:border-primary focus:bg-primary focus:text-white w-full text-center"

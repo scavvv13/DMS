@@ -5,6 +5,7 @@ const { createNotification } = require("../utils/NotificationUtil");
 const fs = require("fs");
 const path = require("path");
 const fetch = require("node-fetch");
+const UserModel = require("../models/UserModel");
 
 // Upload Document
 exports.postDocument = async (req, res) => {
@@ -169,28 +170,38 @@ exports.shareDocument = async (req, res) => {
     const { email, name } = req.body;
     const { id } = req.params;
 
+    console.log(
+      "Sharing document:",
+      id,
+      "with email:",
+      email,
+      "and name:",
+      name
+    ); // Log input data
+
     const document = await DocumentModel.findById(id);
     if (!document) {
+      console.log("Document not found");
       return res.status(404).json({ message: "Document not found" });
     }
 
     const user = await UserModel.findOne({ email });
     if (!user) {
+      console.log("User not found");
       return res.status(404).json({ message: "User not found" });
     }
 
     if (document.haveAccess.includes(user._id)) {
+      console.log("User already has access");
       return res.status(400).json({ message: "User already has access" });
     }
 
-    // Grant access to the user
     document.haveAccess.push(user._id);
     await document.save();
 
-    // Check if req.user.name is defined
-    const username = name || "Unknown User"; // Fallback if name is undefined
+    const username = name || "Unknown User";
+    console.log("Creating notification for document sharing");
 
-    // Create notification for document sharing
     await createNotification(
       user._id,
       "Document Shared",
@@ -199,6 +210,7 @@ exports.shareDocument = async (req, res) => {
 
     res.status(200).json({ message: "Document shared successfully" });
   } catch (err) {
+    console.error("Error sharing document:", err);
     res.status(500).json({ message: "Error sharing document", error: err });
   }
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import miaa from "../assets/miaa.png";
 import ICS from "../assets/ICS.png";
 import bago from "../assets/bago.png";
@@ -112,6 +112,9 @@ const LoginPage = () => {
                   {loading ? "Logging in..." : "Login"}{" "}
                   {/* Show loading state */}
                 </button>
+                <Link to="/RegisterPage" className=" content-center mt-5">
+                  Register
+                </Link>
               </div>
             </form>
           </div>
