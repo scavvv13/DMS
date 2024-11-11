@@ -65,30 +65,6 @@ const DashboardPage = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   // Sample data for employees (you can replace this with real data)
-  const employeeWithMostLates = {
-    name: "John Doe",
-    lates: 5,
-    image: "path/to/john-doe.jpg", // Replace with actual image path
-  };
-
-  const topPerformingEmployee = {
-    name: "Bob Brown",
-    uploads: 15,
-    shares: 8,
-    workedOn: 10,
-    image: "path/to/bob-brown.jpg", // Replace with actual image path
-  };
-
-  // Sample data for additional employees
-  const additionalLatesEmployees = [
-    { name: "Jane Smith", lates: 3 },
-    { name: "Alice Johnson", lates: 2 },
-  ];
-
-  const additionalTopPerformers = [
-    { name: "Charlie Black", uploads: 10, shares: 7, workedOn: 5 },
-    { name: "Emily White", uploads: 8, shares: 5, workedOn: 6 },
-  ];
 
   // Data for the Bar chart
   const barData = {
@@ -161,88 +137,6 @@ const DashboardPage = () => {
           date={currentDate}
           className="bg-base-200 p-4 rounded-lg shadow-md h-[320px]"
         />
-      </div>
-
-      {/* Employees with Most Lates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Card for Employee with Most Lates */}
-        <div className="bg-base-200 p-4 rounded-lg shadow-md relative">
-          <img
-            src={employeeWithMostLates.image}
-            alt={employeeWithMostLates.name}
-            className="w-full h-40 object-cover rounded-lg"
-          />
-          <h3 className="text-lg font-semibold mt-2">
-            {employeeWithMostLates.name}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {employeeWithMostLates.lates} lates
-          </p>
-          <button
-            onClick={() => setShowLates(!showLates)}
-            className="absolute top-2 right-2 bg-gray-300 p-1 rounded-full hover:bg-gray-400"
-          >
-            {showLates ? "Hide" : "More"}
-          </button>
-          {showLates && (
-            <div className="mt-2">
-              <ul className="border-t pt-2">
-                {additionalLatesEmployees.map((employee, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between py-1 border-b"
-                  >
-                    <span>{employee.name}</span>
-                    <span className="text-xs text-gray-500">
-                      {employee.lates} lates
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        {/* Card for Top Performing Employee */}
-        <div className="bg-base-200 p-4 rounded-lg shadow-md relative">
-          <img
-            src={topPerformingEmployee.image}
-            alt={topPerformingEmployee.name}
-            className="w-full h-40 object-cover rounded-lg"
-          />
-          <h3 className="text-lg font-semibold mt-2">
-            {topPerformingEmployee.name}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {topPerformingEmployee.uploads} uploads,{" "}
-            {topPerformingEmployee.shares} shares,{" "}
-            {topPerformingEmployee.workedOn} worked on
-          </p>
-          <button
-            onClick={() => setShowPerformance(!showPerformance)}
-            className="absolute top-2 right-2 bg-gray-300 p-1 rounded-full hover:bg-gray-400"
-          >
-            {showPerformance ? "Hide" : "More"}
-          </button>
-          {showPerformance && (
-            <div className="mt-2">
-              <ul className="border-t pt-2">
-                {additionalTopPerformers.map((employee, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between py-1 border-b"
-                  >
-                    <span>{employee.name}</span>
-                    <span className="text-xs text-gray-500">
-                      {employee.uploads} uploads, {employee.shares} shares,{" "}
-                      {employee.workedOn} worked on
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Recent Activity */}
