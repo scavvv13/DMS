@@ -16,7 +16,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // Change this to your frontend's URL
+    origin: "https://dms-df98dr3j9-scaves-projects.vercel.app/", // Change this to your frontend's URL
     methods: ["GET", "POST", "OPTIONS", "PATCH", "DELETE"], // Allow necessary methods
     credentials: true, // If you need to pass cookies or authorization headers
   })
