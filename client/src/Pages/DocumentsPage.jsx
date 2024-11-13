@@ -18,7 +18,6 @@ const DocumentsPage = () => {
   const [toastType, setToastType] = useState("");
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state for documents
-  const encodedFilePath = encodeURIComponent("uploads/documents/sample.pdf");
 
   useEffect(() => {
     const fetchDocuments = async () => {
