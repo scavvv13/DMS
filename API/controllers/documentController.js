@@ -1,23 +1,43 @@
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
 const DocumentModel = require("../models/DocumentModel");
 const bucket = require("../config/firebase");
-const { v4: uuidv4 } = require("uuid");
 const { createNotification } = require("../utils/NotificationUtil");
 const fs = require("fs");
 const path = require("path");
 const fetch = require("node-fetch");
 const UserModel = require("../models/UserModel");
 
-// Upload Document
+// Multer setup for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(), // Store files in memory before uploading to Firebase
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
+});
+
 exports.postDocument = async (req, res) => {
   try {
-    const { documentName, documentType, documentUploader, haveAccess } =
+    const { documentName, documentUploader, documentType, haveAccess } =
       req.body;
-    const file = req.file;
+    const file = req.file; // Multer adds the uploaded file here
 
+    // Debugging: Log file and body data
+    console.log("req.file:", req.file);
+    console.log("req.body:", req.body);
+
+    // Check if file is provided
     if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // Validate required fields
+    if (!documentName || !documentUploader || !documentType) {
+      return res.status(400).json({
+        message: "Missing required fields",
+        requiredFields: { documentName, documentUploader, documentType },
+      });
+    }
+
+    // Create a unique filename and upload to Firebase
     const blob = bucket.file(`${uuidv4()}-${file.originalname}`);
     const blobStream = blob.createWriteStream({ resumable: false });
 
@@ -41,6 +61,7 @@ exports.postDocument = async (req, res) => {
 
       await document.save();
 
+      // Optionally, create a notification for the upload
       await createNotification(
         documentUploader,
         "New Document Uploaded",
@@ -54,7 +75,10 @@ exports.postDocument = async (req, res) => {
 
     blobStream.end(file.buffer);
   } catch (err) {
-    res.status(500).json({ message: "Error uploading document", error: err });
+    console.error("Error uploading document:", err);
+    res
+      .status(500)
+      .json({ message: "Error uploading document", error: err.message });
   }
 };
 

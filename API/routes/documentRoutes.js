@@ -15,17 +15,19 @@ const router = express.Router();
 
 // Multer setup for file uploads
 const upload = multer({
-  storage: multer.memoryStorage(), // Store files in memory before uploading to Firebase
-  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file limit
 });
 
 // Routes
 router.post(
   "/documents",
-  authMiddleware(["user", "admin"]),
-  upload.single("document"),
-  postDocument
-); // Upload document
+  authMiddleware(["user", "admin"]), // Check user authentication/authorization
+  upload.single("document"), // Use 'document' as the field name for file upload
+  postDocument // Handle the file upload logic
+);
+
+module.exports = router;
 
 router.get("/documents", authMiddleware(["user", "admin"]), getDocuments); // Get all documents
 
