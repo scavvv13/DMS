@@ -16,7 +16,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://document-management-system-sepia.vercel.app",
     // Change this to your frontend's URL
     methods: ["GET", "POST", "OPTIONS", "PATCH", "DELETE", "HEAD"], // Allow necessary methods
     credentials: true, // If you need to pass cookies or authorization headers
