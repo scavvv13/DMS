@@ -27,12 +27,6 @@ const UploadDocumentModal = ({ refreshDocuments }) => {
     const formData = new FormData();
     formData.append("document", file); // Append the selected file
     formData.append("documentName", documentName); // Add the document name
-
-    if (!user || !user.id) {
-      setUploadError("Uploader information is missing.");
-      return;
-    }
-
     formData.append("documentUploader", user.id); // Use the uploader's ID
     formData.append("documentType", file.type); // Store the file type
 
@@ -42,15 +36,27 @@ const UploadDocumentModal = ({ refreshDocuments }) => {
       formData.append("haveAccess", userId); // Append each user ID
     });
 
+    // Debugging: Log the FormData contents
+    console.log("FormData contents:");
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
     setLoading(true);
+
     try {
-      await axiosInstance.post("/documents", formData);
+      // Send the form data to the backend
+      const response = await axiosInstance.post("/documents", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Make sure this header is set correctly
+        },
+      });
+
+      // Clear the file input and document name after successful upload
       setFile(null);
       setDocumentName("");
       setUploadError(null);
-
-      // Clear the file input field
-      fileInputRef.current.value = ""; // Reset the file input
+      fileInputRef.current.value = ""; // Reset the file input field
 
       // Refresh documents after upload
       await refreshDocuments();
