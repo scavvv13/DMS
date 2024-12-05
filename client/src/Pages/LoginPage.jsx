@@ -26,7 +26,7 @@ const LoginPage = () => {
           navigate(
             loggedInUser.role === "admin"
               ? "/admin/UsersPage"
-              : "/user/DashboardPage"
+              : "/user/DocumentsPage"
           );
         }
       };
@@ -47,7 +47,7 @@ const LoginPage = () => {
         navigate(
           loggedInUser.role === "admin"
             ? "/admin/DashboardPage "
-            : "/user/UserDashPage"
+            : "/admin/DocumentsPage"
         );
       } else {
         console.error("User role not found.");
