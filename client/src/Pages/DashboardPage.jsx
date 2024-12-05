@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { Link } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
@@ -144,7 +145,7 @@ const DashboardPage = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <Link to="/documents">
+        <Link to="/admin/DocumentsPage">
           <div className="card bg-primary text-primary-content shadow-md p-4 hover:bg-primary-focus cursor-pointer">
             <div className="card-body flex items-center justify-between">
               <h2 className="card-title text-sm">Manage Documents</h2>
@@ -166,7 +167,7 @@ const DashboardPage = () => {
           </div>
         </Link>
 
-        <Link to="/upload">
+        <Link to="/admin/DocumentsPage">
           <div className="card bg-secondary text-secondary-content shadow-md p-4 hover:bg-secondary-focus cursor-pointer">
             <div className="card-body flex items-center justify-between">
               <h2 className="card-title text-sm">Upload New Document</h2>
