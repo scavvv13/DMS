@@ -227,7 +227,7 @@ const DocumentsPage = () => {
                     doc.documentSize
                   )}`}</p>
                   <div className="card-actions flex justify-between items-center mt-2">
-                    <div className="badge badge-secondary badge-outline ml-1">
+                    <div className="badge badge-secondary badge-outline ml-1 overflow-hidden">
                       {doc.documentType}
                     </div>
                     <div>

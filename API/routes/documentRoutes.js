@@ -49,7 +49,11 @@ router.post(
   removeAccess
 );
 
-router.get("/countDocuments", authMiddleware(["admin"]), countDocuments);
+router.get(
+  "/countDocuments",
+  authMiddleware(["user", "admin"]),
+  countDocuments
+);
 
 router.get(
   "/documents/:fileName/download",
@@ -59,7 +63,7 @@ router.get(
 
 router.get(
   "/countSharedDocuments",
-  authMiddleware(["admin"]),
+  authMiddleware(["user", "admin"]),
   countSharedDocuments
 );
 

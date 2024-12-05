@@ -80,9 +80,10 @@ const DashboardPage = () => {
   // Data for the Employee Attendance Pie chart
 
   return (
-    <div className="p-4 space-y-6">
+    <div className=" p-4 space-y-6">
       {/* Metrics Section */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+      <div className="grid grid-cols-2 gap-4">
         <div className="card bg-base-100 shadow-md p-4">
           <div className="card-body">
             <h2 className="card-title text-sm">Total Documents</h2>
@@ -96,22 +97,6 @@ const DashboardPage = () => {
             <h2 className="card-title text-sm">Documents Shared</h2>
             <p className="text-2xl font-bold">{sharedCount}</p>
             <p className="text-xs text-gray-500">Shared with others</p>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-md p-4">
-          <div className="card-body">
-            <h2 className="card-title text-sm">Your Uploads</h2>
-            <p className="text-2xl font-bold">68</p>
-            <p className="text-xs text-gray-500">Uploaded by you</p>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-md p-4">
-          <div className="card-body">
-            <h2 className="card-title text-sm">Pending Approvals</h2>
-            <p className="text-2xl font-bold">12</p>
-            <p className="text-xs text-gray-500">Awaiting approval</p>
           </div>
         </div>
       </div>
