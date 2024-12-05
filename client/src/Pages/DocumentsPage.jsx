@@ -61,6 +61,19 @@ const DocumentsPage = () => {
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
+  const getFileTypeDisplayName = (mimeType) => {
+    const fileTypeMappings = {
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        "DOC",
+      "application/pdf": "PDF",
+      "image/jpeg": "JPEG ",
+      "image/png": "PNG",
+      // Add more mappings as needed
+    };
+
+    return fileTypeMappings[mimeType] || mimeType; // Default to raw MIME type
+  };
+
   const refreshDocuments = async () => {
     if (!user) return; // Check if user is logged in
     try {
@@ -216,7 +229,7 @@ const DocumentsPage = () => {
                 className="card bg-base-300 shadow-xl compact-card"
                 key={doc._id}
               >
-                <figure className="h-36 overflow-hidden">
+                <figure className="h-36 overflow">
                   {renderDocumentPreview(doc)}
                 </figure>
                 <div className="card-body p-2">
@@ -228,7 +241,7 @@ const DocumentsPage = () => {
                   )}`}</p>
                   <div className="card-actions flex justify-between items-center mt-2">
                     <div className="badge badge-secondary badge-outline ml-1 overflow-hidden">
-                      {doc.documentType}
+                      {getFileTypeDisplayName(doc.documentType)}
                     </div>
                     <div>
                       <button
@@ -268,7 +281,7 @@ const DocumentsPage = () => {
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                            d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6.75 0a.75.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
                           />
                         </svg>
                       </button>
