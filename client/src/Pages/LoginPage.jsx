@@ -10,6 +10,7 @@ const LoginPage = () => {
   const { login, loading, error, fetchUserData } = useUser(); // Destructure context
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
   const navigate = useNavigate(); // Hook for navigation
 
   // Check if the user is already logged in and redirect based on their role
@@ -46,11 +47,11 @@ const LoginPage = () => {
       if (loggedInUser && loggedInUser.role) {
         navigate(
           loggedInUser.role === "admin"
-            ? "/admin/DashboardPage "
-            : "/admin/DocumentsPage"
+            ? "/admin/DashboardPage"
+            : "/user/DocumentsPage"
         );
       } else {
-        console.error("User role not found.");
+        console.error("User  role not found.");
       }
     } catch (err) {
       console.error("Login failed:", err); // Handle login error
@@ -94,12 +95,22 @@ const LoginPage = () => {
                   <span className="label-text">Password</span>
                 </label>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Toggle password visibility
                   placeholder="password"
                   className="input input-bordered"
                   onChange={(e) => setPassword(e.target.value)} // Set password state
                   required
                 />
+                <label className="label cursor-pointer">
+                  <span className="label-text">
+                    <input
+                      type="checkbox"
+                      className="mr -2"
+                      onChange={() => setShowPassword(!showPassword)}
+                    />
+                    Show Password
+                  </span>
+                </label>
               </div>
               {error && <p className="text-red-500">{error}</p>}{" "}
               {/* Display error message */}
@@ -112,7 +123,7 @@ const LoginPage = () => {
                   {loading ? "Logging in..." : "Login"}{" "}
                   {/* Show loading state */}
                 </button>
-                <Link to="/RegisterPage" className=" content-center mt-5">
+                <Link to="/RegisterPage" className="content-center mt-5">
                   Register
                 </Link>
               </div>
@@ -124,16 +135,15 @@ const LoginPage = () => {
         <footer className="w-full flex justify-around px-8 py-4">
           <div className="card bg-base-300 rounded-box p-4 text-center w-[45%]">
             <p>
-              Mission: To provide a safe, secure, seamless, and sustainable
-              airport environment contributing to the economic growth of the
-              Philippines.
+              Mission: PhilSCA continues to produce world-class professionals in
+              the Aviation Industry through quality instruction, research,
+              extension, resource management and industry partnership
             </p>
           </div>
           <div className="card bg-base-300 rounded-box p-4 text-center w-[45%]">
             <p>
-              Vision: By 2028, NAIA will be a digitally transformed airport
-              providing seamless connectivity and excellent customer experience
-              showcasing Filipino hospitality and gender inclusivity.
+              Vision: PhilSCA is a leading Higher Education institution in
+              Aviation Sciences with a balanced Liberal Arts and Technology.
             </p>
           </div>
         </footer>

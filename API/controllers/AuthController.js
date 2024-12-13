@@ -25,12 +25,21 @@ const register = async (req, res) => {
         .json({ message: "Password must be at least 8 characters long" });
     }
 
+    // Validate password complexity: at least one uppercase letter, one number, and alphanumeric
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be alphanumeric with at least one capital letter and one number.",
+      });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
         .status(400)
-        .json({ message: "User with this email already exists" });
+        .json({ message: "User  with this email already exists" });
     }
 
     let profilePictureUrl = ""; // Placeholder for profile image URL

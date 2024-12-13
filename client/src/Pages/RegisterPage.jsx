@@ -11,6 +11,7 @@ const RegisterPage = () => {
   const [profilePicture, setProfilePicture] = useState(null); // State to handle profile picture
   const [error, setError] = useState(null); // To display error messages
   const [loading, setLoading] = useState(false); // To handle loading state
+  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -96,19 +97,29 @@ const RegisterPage = () => {
                 <span className="label-text">Password</span>
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"} // Toggle password visibility
                 placeholder="password"
                 className="input input-bordered"
                 onChange={(e) => setPassword(e.target.value)} // Set password state
                 required
               />
+              <label className="label cursor-pointer">
+                <span className="label-text">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    onChange={() => setShowPassword(!showPassword)}
+                  />
+                  Show Password
+                </span>
+              </label>
             </div>
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Confirm Password</span>
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"} // Toggle confirm password visibility
                 placeholder="Re-type Password"
                 className="input input-bordered"
                 onChange={(e) => setConfirmPassword(e.target.value)} // Set confirm password state
