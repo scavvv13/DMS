@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const fetch = require("node-fetch");
 const UserModel = require("../models/UserModel");
+const FolderModel = require("../models/FolderModel");
 
 // Multer setup for file uploads
 const upload = multer({
@@ -16,8 +17,13 @@ const upload = multer({
 
 exports.postDocument = async (req, res) => {
   try {
-    const { documentName, documentUploader, documentType, haveAccess } =
-      req.body;
+    const {
+      documentName,
+      documentUploader,
+      documentType,
+      haveAccess,
+      folderId,
+    } = req.body;
     const file = req.file; // Multer adds the uploaded file here
 
     // Debugging: Log file and body data
@@ -35,6 +41,14 @@ exports.postDocument = async (req, res) => {
         message: "Missing required fields",
         requiredFields: { documentName, documentUploader, documentType },
       });
+    }
+
+    // Validate folderId if provided
+    if (folderId) {
+      const folderExists = await FolderModel.findById(folderId);
+      if (!folderExists) {
+        return res.status(400).json({ message: "Invalid folder ID" });
+      }
     }
 
     // Create a unique filename and upload to Firebase
@@ -56,6 +70,7 @@ exports.postDocument = async (req, res) => {
         documentType,
         documentPath,
         documentUploader,
+        folderId: folderId || null,
         haveAccess: haveAccess || [],
       });
 
@@ -120,10 +135,19 @@ exports.downloadDocument = async (req, res) => {
 exports.getDocuments = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { folderId } = req.query; // Retrieve folderId from query params
 
-    const documents = await DocumentModel.find({
+    // Query filters based on folderId
+    const query = {
       $or: [{ documentUploader: userId }, { haveAccess: userId }],
-    })
+    };
+    if (folderId) {
+      query.folderId = folderId; // Filter by folderId if provided
+    } else {
+      query.folderId = null; // Fetch documents in the "root" directory
+    }
+
+    const documents = await DocumentModel.find(query)
       .populate("documentUploader", "name email")
       .populate("haveAccess", "name email");
 

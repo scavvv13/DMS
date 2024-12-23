@@ -30,6 +30,11 @@ const DocumentSchema = new mongoose.Schema(
       required: [true, "Uploader is required"],
     },
     haveAccess: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    folderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Folder", // Reference to Folder model
+      default: null, // If null, the document is not in a folder
+    },
   },
   { timestamps: true }
 );

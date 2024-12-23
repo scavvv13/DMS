@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import axiosInstance from "../utils/axiosInstance"; // Ensure you have your axios instance set up
 import { useUser } from "../contexts/UserContext"; // User context for auth
 
-const UploadDocumentModal = ({ refreshDocuments }) => {
+const UploadDocumentModal = ({ refreshDocuments, selectedFolder }) => {
   const { user } = useUser(); // Get user data to ensure authorization
   const [file, setFile] = useState(null);
   const [documentName, setDocumentName] = useState(""); // State for document name
@@ -29,6 +29,12 @@ const UploadDocumentModal = ({ refreshDocuments }) => {
     formData.append("documentName", documentName); // Add the document name
     formData.append("documentUploader", user.id); // Use the uploader's ID
     formData.append("documentType", file.type); // Store the file type
+    if (selectedFolder) {
+      formData.append("folderId", selectedFolder); // Add the selected folder ID if it exists
+    }
+
+    console.log("Selected folder:", selectedFolder);
+    setLoading(true);
 
     // Populate this array with IDs of users who should have access
     const accessUsers = []; // Example: ['605c72d3f1e6b8b75d9a2c0c', '605c72d3f1e6b8b75d9a2c0d'];
