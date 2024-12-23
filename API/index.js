@@ -10,6 +10,7 @@ const documentRoutes = require("./routes/documentRoutes");
 const memoRoutes = require("./routes/MemoRoutes");
 const NotificationRoutes = require("./routes/NotificationRoutes");
 const AttendanceRoutes = require("./routes/AttendanceRoutes");
+const folderRoutes = require("./routes/FolderRoutes"); // Added FolderRoutes
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/", documentRoutes);
 app.use("/api/", memoRoutes);
 app.use("/api/", NotificationRoutes);
 app.use("/api/", AttendanceRoutes);
+app.use("/api/", folderRoutes); // Added route for folders
 
 // Database connection
 mongoose
